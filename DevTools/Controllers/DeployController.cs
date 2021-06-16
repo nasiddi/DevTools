@@ -55,9 +55,9 @@ namespace SpaDeployment.Controllers
         [Route("spa")]
         public async Task<IActionResult> DeploySpa()
         {
-                var commit = GitPull();
-
                 var localProjectRoot = GetLocalProjectRoot();
+
+                var commit = GitPull(localProjectRoot);
 
                 await PersistCommit(commit: commit, localProjectRoot: localProjectRoot);
 
@@ -117,10 +117,10 @@ namespace SpaDeployment.Controllers
             return projectFolder;
         }
 
-        private static Commit GitPull()
+        private static Commit GitPull(string localProjectRoot)
         {
-            RunCommand("cd ~/code/SPA && git pull");
-            var commitString = RunCommand("cd ~/code/SPA && git log --pretty=format:\"%h%x09%ad%x09%s\" --date=iso -1");
+            RunCommand($"cd {localProjectRoot} && git pull");
+            var commitString = RunCommand($"cd {localProjectRoot} && git log --pretty=format:\"%h%x09%ad%x09%s\" --date=iso -1");
             var commitSplit = commitString.Split('\t');
             var commit = new Commit(commitSplit[0], commitSplit[2], DateTime.Parse(commitSplit[1]));
             return commit;

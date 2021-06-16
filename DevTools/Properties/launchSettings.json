@@ -18,7 +18,7 @@
     "DevTools": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:7000",
+      "applicationUrl": "https://localhost:7001;http://localhost:7000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
