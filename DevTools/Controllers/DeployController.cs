@@ -113,6 +113,7 @@ namespace DevTools.Controllers
 
         private static Commit GitPull(string localProjectRoot)
         {
+            Console.WriteLine(localProjectRoot);
             RunCommand($"cd {localProjectRoot} && git pull");
             var commitString = RunCommand($"cd {localProjectRoot} && git log --pretty=format:\"%h%x09%ad%x09%s\" --date=iso -1");
             var commitSplit = commitString.Split('\t');
