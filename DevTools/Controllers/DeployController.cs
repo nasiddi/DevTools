@@ -2,19 +2,18 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using DevTools.Models;
 using FluentFTP;
 using FluentFTP.Rules;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using SpaDeployment.Models;
 
-namespace SpaDeployment.Controllers
+namespace DevTools.Controllers
 {
     [Authorize]
     [ApiController]
@@ -25,13 +24,7 @@ namespace SpaDeployment.Controllers
         private static readonly string ProjectName = "SPA";
         private static readonly string RemoteTarget = "/spa_root";
         private static readonly string DeploymentFile = "deployment.json";
-        
-        
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-        
+
         public DeployController(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -70,13 +63,14 @@ namespace SpaDeployment.Controllers
         {
             var client = await GetFtpClient();
             var ftpFileNameRegexRule = new FtpFileNameRegexRule(false, new List<string> {"^[.]"});
-            var ftpFolderNameRegexRule = new FtpFolderRegexRule(false, new List<string> {"^[.]"});
+            var ftpHiddenFolderNameRegexRule = new FtpFolderRegexRule(false, new List<string> {"^[.]"});
+            var ftpDevFolderNameRegexRule = new FtpFolderNameRule(false, new List<string> {"development"});
             var result = await client.UploadDirectoryAsync(
                 localFolder: localProjectRoot,
                 remoteFolder: RemoteTarget,
                 mode: FtpFolderSyncMode.Mirror,
                 existsMode: FtpRemoteExists.Overwrite,
-                rules: new List<FtpRule> {ftpFileNameRegexRule, ftpFolderNameRegexRule});
+                rules: new List<FtpRule> {ftpFileNameRegexRule, ftpHiddenFolderNameRegexRule, ftpDevFolderNameRegexRule});
 
             await client.DisconnectAsync();
         }

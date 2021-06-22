@@ -1,6 +1,6 @@
 using System;
 
-namespace SpaDeployment.Models
+namespace DevTools.Models
 {
     public record Commit(string Hash, string Message, DateTime Date);
 }
