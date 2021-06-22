@@ -115,7 +115,7 @@ namespace DevTools.Controllers
         {
             Console.WriteLine(localProjectRoot);
             RunCommand($"cd {localProjectRoot} && git pull");
-            var commitString = RunCommand($"cd {localProjectRoot} && su - nadina && git log --pretty=format:\"%h%x09%ad%x09%s\" --date=iso -1");
+            var commitString = RunCommand($"cd {localProjectRoot} && git log --pretty=format:\"%h%x09%ad%x09%s\" --date=iso -1");
             var commitSplit = commitString.Split('\t');
             var commit = new Commit(commitSplit[0], commitSplit[2], DateTime.Parse(commitSplit[1]));
             return commit;
@@ -134,7 +134,7 @@ namespace DevTools.Controllers
                 }
             };
             
-            proc.Start ();
+            proc.Start();
 
             var stringBuilder = new StringBuilder();
 
