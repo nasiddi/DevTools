@@ -18,5 +18,7 @@ namespace DevTools.Data
         ) : base(options, operationalStoreOptions)
         {
         }
+
+        public DbSet<HueColor> HueColors { get; set; }
     }
 }

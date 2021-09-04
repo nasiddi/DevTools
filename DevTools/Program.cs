@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using HueIrisColorTask = DevTools.BackgroundTasks.HueIrisColorTask;
 
 namespace DevTools
 {
@@ -20,6 +22,11 @@ namespace DevTools
 
                     config.AddEnvironmentVariables();
                 })
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
+                .ConfigureServices(configureDelegate: services =>
+                {
+                    services.AddSingleton<HueIrisColorTask>();
+                    services.AddHostedService(implementationFactory: p => p.GetRequiredService<HueIrisColorTask>());
+                });
     }
 }
