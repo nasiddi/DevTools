@@ -20,5 +20,6 @@ namespace DevTools.Data
         }
 
         public DbSet<HueColor> HueColors { get; set; }
+        public DbSet<KidsNumber> KidsNumber { get; set; }
     }
 }

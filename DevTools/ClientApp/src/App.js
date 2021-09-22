@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router';
-import { Layout } from './components/Layout';
 import { Home } from './components/Home';
 import { Deploy } from './components/Deploy';
 import AuthorizeRoute from './components/api-authorization/AuthorizeRoute';
@@ -9,18 +8,30 @@ import { ApplicationPaths } from './components/api-authorization/ApiAuthorizatio
 
 import './custom.css'
 import {HueColors} from "./components/HueColors";
+import {DisplayNumber, EnterNumber} from "./components/NumberDisplay";
+import {DefaultLayout, NumberLayout} from "./components/Layout";
 
 export default class App extends Component {
   static displayName = App.name;
 
-  render () {
+
+
+    render () {
     return (
-      <Layout>
-        <Route exact path='/' component={Home} />
-        <AuthorizeRoute path='/deploy-spa' component={Deploy} />
-        <AuthorizeRoute path='/hue-colors' component={HueColors} />
-        <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} />
-      </Layout>
+        <div>
+          <DefaultLayout>
+            <Route exact path='/' component={Home} />
+            <AuthorizeRoute path='/deploy-spa' component={Deploy} />
+            <AuthorizeRoute path='/hue-colors' component={HueColors} />
+              <Route path='/number' component={EnterNumber}/>
+              <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} />
+          </DefaultLayout>
+          <NumberLayout>
+              <Route path='/kids-number' component={DisplayNumber}/>
+              {/*<Route exact path="/kids-number" render={() => {window.location.href="number.html"}} />*/}
+
+          </NumberLayout>
+        </div>
     );
   }
 }
