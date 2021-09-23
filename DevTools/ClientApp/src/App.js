@@ -9,7 +9,7 @@ import { ApplicationPaths } from './components/api-authorization/ApiAuthorizatio
 import './custom.css'
 import {HueColors} from "./components/HueColors";
 import {DisplayNumber, EnterNumber} from "./components/NumberDisplay";
-import {DefaultLayout, NumberLayout} from "./components/Layout";
+import {DefaultLayout, NumberDisplayLayout} from "./components/Layout";
 
 export default class App extends Component {
   static displayName = App.name;
@@ -26,11 +26,11 @@ export default class App extends Component {
               <Route path='/number' component={EnterNumber}/>
               <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} />
           </DefaultLayout>
-          <NumberLayout>
+          <NumberDisplayLayout>
               <Route path='/kids-number' component={DisplayNumber}/>
               {/*<Route exact path="/kids-number" render={() => {window.location.href="number.html"}} />*/}
 
-          </NumberLayout>
+          </NumberDisplayLayout>
         </div>
     );
   }

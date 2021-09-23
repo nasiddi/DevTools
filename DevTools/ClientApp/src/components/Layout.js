@@ -2,17 +2,19 @@ import React, { Component } from 'react';
 import { Container } from 'reactstrap';
 import { NavMenu } from './NavMenu';
 
+const urlsToHideTheMenu = ['/kids-number', '/number']
+
 export const DefaultLayout = (props) => {
     return (
         <div>
             {/* eslint-disable-next-line no-restricted-globals */}
-            {location.pathname === '/kids-number' ? null : <NavMenu />}
+            {urlsToHideTheMenu.includes(location.pathname) ? null : <NavMenu />}
             <Container>{props.children}</Container>
         </div>
     )
 }
 
-export const NumberLayout = (props) => {
+export const NumberDisplayLayout = (props) => {
     return (
         <div>
             <Container fluid={true} style={{textAlignVertical: 'bottom', backgroundColor: 'red'}}>

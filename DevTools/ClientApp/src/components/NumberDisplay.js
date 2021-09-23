@@ -23,20 +23,20 @@ export function EnterNumber(){
         load().then()
     }, [])
 
-    return <Grid container spacing={3}>
-        <Grid item>
-            <TextField label={'Ausrufsnummer'} variant={'filled'} type="number" value={number} onChange={onNumberChange}/>
+    return <Grid container spacing={3} style={{marginTop: 50}}>
+        <Grid item xs={12} sm={6} md={4}>
+            <TextField label={'Ausrufsnummer'} variant={'outlined'}  type="number" value={number} onChange={onNumberChange} fullWidth/>
         </Grid>
-        <Grid item>
-            <Button variant={'contained'} onClick={onButtonClick}>Enter</Button>
+        <Grid item xs={12} sm={6} md={4}>
+            <Button variant={'contained'} color={'primary'} onClick={onButtonClick} fullWidth size={"large"} style={{height: 56}}>Send</Button>
         </Grid>
-        <Grid item>
+        <Grid item xs={12} md={4}>
             <h3>Aktuelle Anzeige: {displayed.number}</h3>
         </Grid>
     </Grid>
 } 
 
-export function DisplayNumber(props){
+export function DisplayNumber(){
     const [number, setNumber] = useState('')
 
     useEffect(() => {
