@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using HueIrisColorTask = DevTools.BackgroundTasks.HueIrisColorTask;
+using SpaDeployTask = DevTools.BackgroundTasks.SpaDeployTask;
 
 namespace DevTools
 {
@@ -25,6 +26,8 @@ namespace DevTools
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
                 .ConfigureServices(configureDelegate: services =>
                 {
+                    services.AddSingleton<SpaDeployTask>();
+                    services.AddHostedService(implementationFactory: p => p.GetRequiredService<SpaDeployTask>());
                     services.AddSingleton<HueIrisColorTask>();
                     services.AddHostedService(implementationFactory: p => p.GetRequiredService<HueIrisColorTask>());
                 });

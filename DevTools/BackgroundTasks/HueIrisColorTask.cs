@@ -28,17 +28,24 @@ namespace DevTools.BackgroundTasks
             _serviceScopeFactory = serviceScopeFactory;
         }
         
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            var task = ExecuteAsync(cancellationToken: cancellationToken);
+            return task.IsCompleted ? task : Task.CompletedTask;
+        }
+
+        private async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
-                    var dbContext = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    var dbContext = _serviceScopeFactory.CreateScope().ServiceProvider
+                        .GetRequiredService<ApplicationDbContext>();
                     var hueColors = await dbContext.HueColors.ToListAsync(cancellationToken);
-                
+
                     var locator = new HttpBridgeLocator();
-                    var bridges  = await locator.LocateBridgesAsync(TimeSpan.FromSeconds(5));
+                    var bridges = await locator.LocateBridgesAsync(TimeSpan.FromSeconds(5));
                     var client = new LocalHueClient(bridges.First().IpAddress);
                     var appKey = _configuration.GetSection("HueAppKey");
                     client.Initialize(appKey.Value);
@@ -50,14 +57,14 @@ namespace DevTools.BackgroundTasks
                         lightCommand.SetColor(new RGBColor(hueColor.Color));
                         var single = lights.Single(l => l.Id == hueColor.HueId.ToString());
                         lightCommand.Brightness = single.State.Brightness;
-                        await client.SendCommandAsync(lightCommand, lightList: new List<string> { hueColor.HueId.ToString() });
+                        await client.SendCommandAsync(lightCommand, lightList: new List<string> {hueColor.HueId.ToString()});
                     }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
-                
+
                 ColorChanged = false;
                 await Sleep(cancellationToken);
             }
