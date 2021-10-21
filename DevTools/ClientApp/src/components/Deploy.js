@@ -4,12 +4,12 @@ import {Alert, Button, Col, Container, Row, Spinner} from "reactstrap";
 import {Checkbox, FormControlLabel} from "@material-ui/core";
 
 export function Deploy(props) {
-    
+    const defaultAlert = { text: '', color: 'success', showSpinner: false }
     const [state, setState] = useState({ 
         commit: {}, 
         loading: true, 
         deployOnChange: false,
-        alert: { text: '', color: 'success', showSpinner: false } 
+        alert: defaultAlert
     })
 
   async function getLatestCommit() {
@@ -26,11 +26,11 @@ export function Deploy(props) {
           const data = await response.json();
           const status = await backgroundTask.json();
 
-          const alert = status.isRunning ? {text: 'Uploading Files', color: 'info', showSpinner: true} : { text: '', color: 'success', showSpinner: false }
+          const alert = status.isRunning ? {text: 'Uploading Files', color: 'info', showSpinner: true} : defaultAlert
           
           setState({
               ...state, 
-              alert: status.isEnabled ? alert : status.alert, 
+              alert: status.isEnabled ? alert : status.alert ?? defaultAlert, 
               commit: data, 
               loading: false, 
               deployOnChange: 
