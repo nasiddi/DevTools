@@ -59,11 +59,21 @@ namespace DevTools.Controllers
         }
 
         [HttpGet]
-        [Route("automatic-deploy-enabled")]
-        public IActionResult IsAutoDeploy()
+        [Route("background-task")]
+        public IActionResult GetBackgroundTaskStatus()
         {
             var spaDeployTask = _serviceProvider.GetService<SpaDeployTask>();
-            return Ok(spaDeployTask!.IsEnabled);
+            return Ok(new BackgroundTaskStatus
+            {
+                IsEnabled = spaDeployTask!.IsEnabled,
+                IsRunning = spaDeployTask.IsRunning
+            });
         }
+    }
+
+    public class BackgroundTaskStatus
+    {
+        public bool IsEnabled { get; set; }
+        public bool IsRunning { get; set; }
     }
 }

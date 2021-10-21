@@ -8,7 +8,7 @@ export function Deploy(props) {
     const [state, setState] = useState({ 
         commit: {}, 
         loading: true, 
-        deployOnChange: false, 
+        deployOnChange: false,
         alert: { text: '', color: 'success', showSpinner: false } 
     })
 
@@ -18,13 +18,24 @@ export function Deploy(props) {
       headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
     });
     if (response.status === 200){
-      const autoResponse = await fetch('deploy/automatic-deploy-enabled', {
+      const backgroundTask = await fetch('deploy/background-task', {
           headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
       }) 
       
       if (response.status === 200){
           const data = await response.json();
-          setState({ ...state, commit: data, loading: false, deployOnChange: await autoResponse.text() === 'true'});
+          const status = await backgroundTask.json();
+
+          const alert = status.isRunning ? {text: 'Uploading Files', color: 'info', showSpinner: true} : { text: '', color: 'success', showSpinner: false }
+          
+          setState({
+              ...state, 
+              alert: status.isEnabled ? alert : status.alert, 
+              commit: data, 
+              loading: false, 
+              deployOnChange: 
+              status.isEnabled
+          });
           return
       }
 
@@ -35,7 +46,7 @@ export function Deploy(props) {
     useEffect(() => {
         const intervalId = setInterval(() => {
             getLatestCommit().then()
-        },2000)
+        },1000)
         return () => clearInterval(intervalId)
     }, [])
 

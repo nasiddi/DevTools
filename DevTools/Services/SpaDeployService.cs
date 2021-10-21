@@ -28,12 +28,7 @@ namespace DevTools.Services
         public async Task<bool> Deploy()
         {
             var localProjectRoot = GetLocalProjectRoot();
-
-            if (!GitPull(localProjectRoot))
-            {
-                return false;
-            }
-
+            HasChanged();
             var commit = GetLastCommit(localProjectRoot);
             await PersistCommit(commit: commit, localProjectRoot: localProjectRoot);
 
@@ -56,8 +51,9 @@ namespace DevTools.Services
             return projectFolder;
         }
         
-        private static bool GitPull(string localProjectRoot)
+        public static bool HasChanged()
         {
+            var localProjectRoot = GetLocalProjectRoot();
             return RunCommand($"cd {localProjectRoot} && git pull") != "Already up to date.\n";
         }
         

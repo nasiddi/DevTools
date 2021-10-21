@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using DevTools.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +10,7 @@ namespace DevTools.BackgroundTasks
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         public bool IsEnabled { get; set; } = true;
+        public bool IsRunning { get; set; }
 
         public SpaDeployTask(IServiceScopeFactory serviceScopeFactory)
         {
@@ -32,7 +32,13 @@ namespace DevTools.BackgroundTasks
             {
                 if (IsEnabled)
                 {
-                    var hasChanged = await spaDeployService!.Deploy();
+                    if (SpaDeployService.HasChanged())
+                    {
+                        IsRunning = true;
+                    }
+
+                    await spaDeployService!.Deploy();
+                    IsRunning = false;
                 }
 
                 await Sleep(cancellationToken);
