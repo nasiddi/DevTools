@@ -4,15 +4,50 @@ import {Alert, Button, Col, Container, Row, Spinner} from "reactstrap";
 import {Checkbox, FormControlLabel} from "@material-ui/core";
 
 export function Deploy(props) {
+    const manualStates = {
+        isRunning: false,
+        isSuccess: false,
+        isUpToDate: false,
+        isUnAuth: false,
+        isFailed: false,
+    }
     const defaultAlert = { text: '', color: 'success', showSpinner: false }
     const [state, setState] = useState({ 
         commit: {}, 
-        loading: true, 
+        taskStates: manualStates,
+        alert: defaultAlert,
         deployOnChange: false,
-        alert: defaultAlert
     })
 
-  async function getLatestCommit() {
+    function getAlert(status) {
+        if (status.isEnabled){
+            return status.isRunning ? {text: 'Uploading Files', color: 'info', showSpinner: true} : defaultAlert
+        }
+        
+        if (state.taskStates.isSuccess) {
+            return {text: 'Deployment completed.', color: 'success'}
+        }
+        
+        if (state.taskStates.isRunning) {
+            return {text: 'Uploading Files', color: 'info', showSpinner: true}
+        }
+        
+        if (state.taskStates.isUpToDate){
+            return {text: 'Already up to date.', color: 'warning'}
+        }
+        
+        if (state.taskStates.isUnAuth){
+            return {text: 'Unauthorized: Try logging out and logging back in.', color: 'danger'}
+        }
+        
+        if (state.taskStates.isFailed){
+            return {text: `Server Error`, color: 'danger'}
+        }
+        
+        return defaultAlert
+    }
+
+    async function getLatestCommit() {
     const token = await authService.getAccessToken();
     const response = await fetch('deploy/commit', {
       headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
@@ -25,16 +60,16 @@ export function Deploy(props) {
       if (backgroundTask.status === 200){
           const data = await response.json();
           const status = await backgroundTask.json();
-
-          const alert = status.isRunning ? {text: 'Uploading Files', color: 'info', showSpinner: true} : defaultAlert
           
+          const alert = getAlert(status)
+
           setState({
-              ...state, 
-              alert: status.isEnabled ? alert : state.alert, 
-              commit: data, 
-              loading: false, 
-              deployOnChange: 
-              status.isEnabled
+              ...state,
+              commit: data,
+              loading: false,
+              deployOnChange: status.isEnabled,
+              taskStates: status.isEnabled ? manualStates : state.taskStates,
+              alert: alert
           });
           return
       }
@@ -45,13 +80,15 @@ export function Deploy(props) {
 
     useEffect(() => {
         const intervalId = setInterval(() => {
-            getLatestCommit().then()
-        },1000)
+            getLatestCommit(false).then()
+        },500)
         return () => clearInterval(intervalId)
-    }, [])
+    })
 
   async function deploy() {
-    setState({...state, alert: {text: 'Uploading Files', color: 'info', showSpinner: true}})
+    const taskStates = manualStates
+    taskStates.isRunning = true  
+    setState({...state, taskStates: taskStates})
     const token = await authService.getAccessToken();
     await fetch(
         `deploy/spa`,
@@ -59,27 +96,36 @@ export function Deploy(props) {
           method: 'POST',
           headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
         }
-    ).then(r => {
+    ).then(async r => {
       if (r.status === 200){
         r.text().then(t => {
           if (t === 'true'){
-            setState({...state, alert: {text: 'Deployment completed.', color: 'success'}})
+            const states = manualStates
+            states.isSuccess = true  
+            setState({...state, taskStates: states})
           } else {
-            setState({...state, alert: {text: 'Already up to date.', color: 'warning'}})
+              const states = manualStates
+              states.isUpToDate = true
+              setState({...state, taskStates: states})       
           }
         })
 
-        getLatestCommit()
         return
       }
 
       if (r.status === 401){
-        setState({...state, alert: {text: 'Unauthorized: Try logging out and logging back in.', color: 'danger'}})
-        return
+          const states = manualStates
+          states.isUnAuth = true
+          setState({...state, taskStates: states})
+          return
       }
 
       if (r.status === 500){
-        r.text().then(t => setState({...state, alert: {text: `Server Error: ${t}`, color: 'danger'}}))
+        r.text().then(t => {
+            const states = manualStates
+            states.isFailed = true
+            setState({...state, taskStates: states})
+        })
       }
     })
   }
@@ -134,9 +180,9 @@ export function Deploy(props) {
     );
   }
 
-  function renderAlert() {
-    const spinner = (state.alert.showSpinner) ? <span><Spinner size="sm" color="info" />{' '}</span> : <div/>
-    return (<Alert color={state.alert.color}>{spinner}{state.alert.text}</Alert>)
+  function renderAlert(alert) {
+      const spinner = (alert.showSpinner) ? <span><Spinner size="sm" color="info" />{' '}</span> : <div/>
+    return (<Alert color={alert.color}>{spinner}{alert.text}</Alert>)
   }
   
     const contents = state.loading ? (
@@ -150,7 +196,7 @@ export function Deploy(props) {
     const alert = state.alert.text.length === 0 ? (
         <div/>
     ) : (
-        renderAlert()
+        renderAlert(state.alert)
     )
 
     return (
