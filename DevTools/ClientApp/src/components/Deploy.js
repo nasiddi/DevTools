@@ -22,7 +22,7 @@ export function Deploy(props) {
           headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
       }) 
       
-      if (response.status === 200){
+      if (backgroundTask.status === 200){
           const data = await response.json();
           const status = await backgroundTask.json();
 
@@ -30,7 +30,7 @@ export function Deploy(props) {
           
           setState({
               ...state, 
-              alert: status.isEnabled ? alert : status.alert ?? defaultAlert, 
+              alert: status.isEnabled ? alert : state.alert, 
               commit: data, 
               loading: false, 
               deployOnChange: 
