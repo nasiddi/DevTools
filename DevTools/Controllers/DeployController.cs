@@ -7,7 +7,6 @@ using DevTools.Models;
 using DevTools.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DevTools.Controllers
@@ -17,13 +16,11 @@ namespace DevTools.Controllers
     [Route("[controller]")]
     public class DeployController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
         private readonly ISpaDeployService _spaDeployService;
         private readonly IServiceProvider _serviceProvider;
         
-        public DeployController(IConfiguration configuration, ISpaDeployService spaDeployService, IServiceProvider serviceProvider)
+        public DeployController(ISpaDeployService spaDeployService, IServiceProvider serviceProvider)
         {
-            _configuration = configuration;
             _spaDeployService = spaDeployService;
             _serviceProvider = serviceProvider;
         }
@@ -32,14 +29,24 @@ namespace DevTools.Controllers
         [Route("commit")]
         public async Task<IActionResult> GetCommit()
         {
-            var client = await _spaDeployService.GetFtpClient();
-            await using var stream = new MemoryStream();
-            await client.DownloadAsync(stream, Path.Join(SpaDeployService.RemoteTarget, SpaDeployService.DeploymentFile));
-            stream.Position = 0;
-            var reader = new StreamReader(stream);
-            string text = await reader.ReadToEndAsync();
-            var commit = JsonSerializer.Deserialize<Commit>(text);
-            return Ok(commit);
+            try
+            {
+                var client = await _spaDeployService.GetFtpClient();
+                await using var stream = new MemoryStream();
+                await client.DownloadAsync(stream,
+                    Path.Join(SpaDeployService.RemoteTarget, SpaDeployService.DeploymentFile));
+                stream.Position = 0;
+                var reader = new StreamReader(stream);
+                string text = await reader.ReadToEndAsync();
+                var commit = JsonSerializer.Deserialize<Commit>(text);
+                return Ok(commit);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return Ok(e.Message);
+            }
+            
         }
 
         [HttpPost]
