@@ -44,7 +44,7 @@ namespace DevTools.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return Ok(e.Message);
+                return Ok(new Commit("Error fetching last commit", e.Message, new DateTime()));
             }
             
         }
