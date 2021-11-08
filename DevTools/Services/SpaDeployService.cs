@@ -38,7 +38,7 @@ namespace DevTools.Services
         
         private static string GetLocalProjectRoot()
         {
-            var root = "~/code";
+            var root = "/home/nadina/code";
 
             var projectFolder = Path.Join(root, ProjectName);
             return projectFolder;
