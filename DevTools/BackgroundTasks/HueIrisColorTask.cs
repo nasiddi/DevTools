@@ -22,15 +22,24 @@ namespace DevTools.BackgroundTasks
         private readonly IConfiguration _configuration;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
+        public bool IsEnabled { get; set; }
+        
         public HueIrisColorTask(IConfiguration configuration, IServiceScopeFactory serviceScopeFactory)
         {
             _configuration = configuration;
             _serviceScopeFactory = serviceScopeFactory;
-        }
+
+    }
         
         public Task StartAsync(CancellationToken cancellationToken)
         {
             var task = ExecuteAsync(cancellationToken: cancellationToken);
+            
+            var dbContext = _serviceScopeFactory.CreateScope().ServiceProvider
+                .GetRequiredService<ApplicationDbContext>();
+
+            IsEnabled = dbContext.Flags.Single(f => f.Name == "HueColorsTaskEnabled").Flag;
+
             return task.IsCompleted ? task : Task.CompletedTask;
         }
 
@@ -38,6 +47,11 @@ namespace DevTools.BackgroundTasks
         {
             while (!cancellationToken.IsCancellationRequested)
             {
+                if (!IsEnabled)
+                {
+                    await WaitForActivation(cancellationToken);
+                }
+                
                 try
                 {
                     var dbContext = _serviceScopeFactory.CreateScope().ServiceProvider
@@ -73,6 +87,19 @@ namespace DevTools.BackgroundTasks
         public Task StopAsync(CancellationToken cancellationToken)  
         {
             return Task.CompletedTask;
+        }
+        
+        private async Task WaitForActivation(CancellationToken cancellationToken)
+        {
+            var waitTask = Task.Run(function: async () =>
+            {
+                while (!IsEnabled)
+                {
+                    await Task.Delay(millisecondsDelay: 5000, cancellationToken: cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+                }
+            }, cancellationToken: cancellationToken);
+
+            await Task.WhenAny(task1: waitTask, task2: Task.Delay(millisecondsDelay: -1, cancellationToken: cancellationToken));
         }
 
         private async Task Sleep(CancellationToken cancellationToken)

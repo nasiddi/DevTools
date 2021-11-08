@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using DevTools.BackgroundTasks;
 using DevTools.Data;
@@ -22,6 +24,29 @@ namespace DevTools.Controllers
         {
             _dbContext = dbContext;
             _serviceProvider = serviceProvider;
+        }
+
+        [HttpGet]
+        [Route("status")]
+        public async Task<IActionResult> GetStatus()
+        {
+            var flag = await _dbContext.Flags.SingleAsync(f => f.Name == "HueColorsTaskEnabled");
+            return Ok(new Dictionary<string, bool>{{"isEnabled", flag.Flag}});
+        }
+
+        [HttpPost]
+        [Route("set-enabled")]
+        public async Task<IActionResult> SetEnabled([FromQuery] bool isEnabled)
+        {
+            var flag = await _dbContext.Flags.SingleAsync(f => f.Name == "HueColorsTaskEnabled");
+            flag.Flag = isEnabled;
+            var mutation = await _dbContext.SaveChangesAsync();
+            var hueIrisColorTask = _serviceProvider.GetService<HueIrisColorTask>();
+            if (hueIrisColorTask != null)
+            {
+                hueIrisColorTask.IsEnabled = isEnabled;
+            }
+            return Ok();
         }
 
         [HttpGet]

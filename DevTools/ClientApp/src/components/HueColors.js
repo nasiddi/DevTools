@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import authService from './api-authorization/AuthorizeService'
 import {Button} from "reactstrap";
 import { HexColorPicker } from "react-colorful";
+import {Checkbox, FormControlLabel} from "@material-ui/core";
 
 export class HueColors extends Component {
     static displayName = HueColors.name;
@@ -11,16 +12,36 @@ export class HueColors extends Component {
 
         this.resetToDefault = this.resetToDefault.bind(this)
         this.setNewDefault = this.setNewDefault.bind(this)
+        this.handleIsEnabledChange = this.handleIsEnabledChange.bind(this)
 
 
         this.state = {
             hueColors: [],
-            loading: true};
+            isEnabled: false,
+        };
     }
 
     componentDidMount() {
+        this.getStatus().then()
         this.getHueColors().then();
     }
+
+    async handleIsEnabledChange(event) {
+        const flag = event.target.checked
+        const token = await authService.getAccessToken();
+        await fetch(
+            `huecolors/set-enabled?isEnabled=${flag}`,
+            {
+                method: 'POST',
+                headers: !token ? {} : {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                contentType: "application/json",
+            }
+        ).then()
+        this.setState({ isEnabled: flag });
+    };
 
     renderLight(light) {
         return (
@@ -41,16 +62,15 @@ export class HueColors extends Component {
     }
 
     render() {
-        const contents = this.state.loading ? (
-            <p>
-                <em>Loading...</em>
-            </p>
-        ) : (
-            this.state.hueColors.map(c => this.renderLight(c))
-        )
+        const contents = this.state.isEnabled ? this.state.hueColors.map(c => this.renderLight(c)) : <></>
 
         return (
             <div className={"colors"}>
+                <h2>Hue Lights</h2>
+                <FormControlLabel
+                    control={<Checkbox color={"primary"} checked={this.state.isEnabled} onChange={this.handleIsEnabledChange} name="isEnabled" />}
+                    label="Is Enabled"
+                />
                 {contents}
             </div>
         );
@@ -110,12 +130,33 @@ export class HueColors extends Component {
 
         if (response.status === 200){
             const data = await response.json();
-            this.setState({ hueColors: data, loading: false });
+            this.setState({ hueColors: data });
             return
         }
 
         if (response.status === 500){
-            response.text().then(t => this.setState({loading: false, alert: {text: `Server Error: ${t}`, color: 'danger'}}))
+            response.text().then(t => this.setState({alert: {text: `Server Error: ${t}`, color: 'danger'}}))
+        }
+    }
+
+    async getStatus() {
+        const token = await authService.getAccessToken();
+        const response = await fetch('huecolors/status', {
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.redirected){
+            window.location.href = response.url;
+            return
+        }
+
+        if (response.status === 200){
+            const status = await response.json();
+            this.setState({ isEnabled: status.isEnabled });
+            return
+        }
+
+        if (response.status === 500){
+            response.text().then(t => this.setState({alert: {text: `Server Error: ${t}`, color: 'danger'}}))
         }
     }
 }
