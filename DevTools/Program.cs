@@ -23,7 +23,11 @@ namespace DevTools
 
                     config.AddEnvironmentVariables();
                 })
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseUrls("http://*:7000");
+                    webBuilder.UseStartup<Startup>();
+                })
                 .ConfigureServices(configureDelegate: services =>
                 {
                     services.AddSingleton<SpaDeployTask>();
