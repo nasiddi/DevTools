@@ -38,15 +38,7 @@ namespace DevTools.Services
         
         private static string GetLocalProjectRoot()
         {
-            var root = Directory.GetCurrentDirectory();
-            Console.WriteLine($"Current Directory: {root}");
-            var currentDirectory = "";
-            while (currentDirectory != "code")
-            {
-                root = Directory.GetParent(root)!.ToString();
-                var folders = root.Split("/");
-                currentDirectory = folders[^1];
-            }
+            var root = "~/code";
 
             var projectFolder = Path.Join(root, ProjectName);
             return projectFolder;
