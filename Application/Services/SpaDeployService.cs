@@ -11,7 +11,7 @@ using FluentFTP;
 using FluentFTP.Rules;
 using Microsoft.Extensions.Configuration;
 
-namespace Application.ClientApp.Services
+namespace Application.Services
 {
     public class SpaDeployService : ISpaDeployService
     {
@@ -38,7 +38,7 @@ namespace Application.ClientApp.Services
         
         private static string GetLocalProjectRoot()
         {
-            var root = "/Users/nadina/code";
+            var root = "/home/nadina/code";
 
             var projectFolder = Path.Join(root, ProjectName);
             return projectFolder;

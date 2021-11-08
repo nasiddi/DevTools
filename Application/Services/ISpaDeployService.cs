@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using FluentFTP;
 
-namespace Application.ClientApp.Services
+namespace Application.Services
 {
     public interface ISpaDeployService
     {
