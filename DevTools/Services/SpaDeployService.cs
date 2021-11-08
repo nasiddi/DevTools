@@ -39,6 +39,7 @@ namespace DevTools.Services
         private static string GetLocalProjectRoot()
         {
             var root = Directory.GetCurrentDirectory();
+            Console.WriteLine($"Current Directory: {root}");
             var currentDirectory = "";
             while (currentDirectory != "code")
             {
