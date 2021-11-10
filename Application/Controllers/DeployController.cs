@@ -50,10 +50,11 @@ namespace Application.Controllers
 
         [HttpPost]
         [Route("spa")]
-        public async Task<IActionResult> DeploySpa()
+        public  IActionResult DeploySpa()
         {
             var task = _spaDeployService.Deploy();
             return Ok();
+            
         }
 
         [HttpPost]
