@@ -10,7 +10,7 @@ namespace Application.BackgroundTasks
     public class SpaDeployTask : IHostedService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        public bool IsEnabled { get; set; } = true;
+        public bool IsEnabled { get; set; } = false;
         public bool IsRunning { get; set; }
 
         public SpaDeployTask(IServiceScopeFactory serviceScopeFactory)
