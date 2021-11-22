@@ -31,16 +31,14 @@ namespace DevTools.Application.BackgroundTasks
 
     }
         
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             var task = ExecuteAsync(cancellationToken: cancellationToken);
             
             var dbContext = _serviceScopeFactory.CreateScope().ServiceProvider
                 .GetRequiredService<DevToolsContext>();
 
-            IsEnabled = dbContext.Flags.Single(f => f.Name == "HueColorsTaskEnabled").Flag;
-
-            return task.IsCompleted ? task : Task.CompletedTask;
+            IsEnabled = (await dbContext.Flags.SingleAsync(f => f.Name == "HueColorsTaskEnabled", cancellationToken: cancellationToken)).Flag;
         }
 
         private async Task ExecuteAsync(CancellationToken cancellationToken)

@@ -88,16 +88,8 @@ export function Deploy() {
 	}
 
 	useEffect(() => {
-		const intervalId = setInterval(() => {
-			getLatestCommit(false).then()
-		}, 2000)
-
-		return () => clearInterval(intervalId)
-	})
-
-	useEffect(() => {
 		getLatestCommit(false).then()
-	})
+	}, [])
 
 	async function deploy() {
 		const taskStates = manualStates
