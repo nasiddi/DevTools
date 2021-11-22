@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="$PROJECT_DIR$" t="IncludeFlat">
-      <e p="Application" t="IncludeRecursive">
+      <e p="DevTools.Application" t="IncludeRecursive">
         <e p=".gitignore" t="Include" />
-        <e p="Application.csproj" t="IncludeRecursive" />
         <e p="appsettings.Development.json" t="Include" />
         <e p="appsettings.json" t="Include" />
         <e p="appsettings.Secrets.json" t="Include" />
@@ -234,6 +233,7 @@
           <e p="AtlantisContextFactory.cs" t="Include" />
           <e p="DevToolsContext.cs" t="Include" />
         </e>
+        <e p="DevTools.Application.csproj" t="IncludeRecursive" />
         <e p="Migrations" t="Include">
           <e p="20211108100316_Init.cs" t="Include" />
           <e p="20211108100316_Init.Designer.cs" t="Include" />
@@ -254,8 +254,8 @@
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="net5.0" t="Include">
-              <e p="Application.AssemblyInfo.cs" t="Include" />
-              <e p="Application.RazorAssemblyInfo.cs" t="Include" />
+              <e p="DevTools.Application.AssemblyInfo.cs" t="Include" />
+              <e p="DevTools.Application.RazorAssemblyInfo.cs" t="Include" />
             </e>
           </e>
         </e>
