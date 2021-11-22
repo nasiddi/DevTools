@@ -12,7 +12,7 @@ namespace DevTools.Application.BackgroundTasks
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         public bool IsEnabled { get; set; }
-        public bool IsRunning { get; private set; }
+        public bool IsRunning { get; set; }
         public bool RunImmediately { get; set; }
         public bool HasChanged { get; private set; } = true;
         public DateTime? LastRun { get; private set; }
@@ -48,6 +48,8 @@ namespace DevTools.Application.BackgroundTasks
                     await WaitForActivation(cancellationToken);
                     enableTime = DateTime.UtcNow;
                 }
+
+                IsRunning = true;
 
                 try
                 {

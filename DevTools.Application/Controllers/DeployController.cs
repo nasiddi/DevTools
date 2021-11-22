@@ -48,6 +48,7 @@ namespace DevTools.Application.Controllers
         {
             var spaDeployTask = _serviceProvider.GetService<SpaDeployTask>();
             spaDeployTask!.RunImmediately = true;
+            spaDeployTask.IsRunning = true;
             return Ok();
         }
 
