@@ -17,36 +17,34 @@ export function Deploy() {
 		taskStates: manualStates,
 		alert: defaultAlert,
 		deployOnChange: false,
+		backgroundTask: {},
 	})
 
 	function getAlert(status) {
-		if (status.isEnabled) {
-			return status.isRunning
-				? { text: 'Uploading Files', color: 'info', showSpinner: true }
-				: defaultAlert
-		}
-
-		if (state.taskStates.isSuccess) {
-			return { text: 'Deployment completed.', color: 'success' }
-		}
-
-		if (status.isRunning) {
+		if (status?.isRunning) {
 			return { text: 'Uploading Files', color: 'info', showSpinner: true }
 		}
 
-		if (state.taskStates.isUpToDate) {
-			return { text: 'Already up to date.', color: 'warning' }
+		if (status.lastRun === null) {
+			return defaultAlert
 		}
 
-		if (state.taskStates.isUnAuth) {
+		if (status?.hasChanged) {
 			return {
-				text: 'Unauthorized: Try logging out and logging back in.',
-				color: 'danger',
+				text: `Deployment completed at ${status.lastRun}.`,
+				color: 'success',
 			}
 		}
 
-		if (state.taskStates.isFailed) {
-			return { text: 'Server Error', color: 'danger' }
+		if (status?.isRunning) {
+			return { text: 'Uploading Files', color: 'info', showSpinner: true }
+		}
+
+		if (!status?.isRunning) {
+			return {
+				text: `Last run at ${status.lastRun}. Already up to date.`,
+				color: 'warning',
+			}
 		}
 
 		return defaultAlert
@@ -66,11 +64,8 @@ export function Deploy() {
 				setState({
 					...state,
 					commit: data,
-					loading: false,
 					deployOnChange: status.isEnabled,
-					taskStates: status.isEnabled
-						? manualStates
-						: state.taskStates,
+					backgroundTask: status,
 					alert: alert,
 				})
 
@@ -92,41 +87,40 @@ export function Deploy() {
 	}, [])
 
 	async function deploy() {
-		const taskStates = manualStates
-		taskStates.isRunning = true
-		setState({ ...state, taskStates: taskStates })
+		setState({
+			...state,
+			alert: {
+				text: 'Task started',
+				color: 'info',
+				showSpinner: true,
+			},
+		})
 		await post('deploy/spa').then(async (r) => {
-			if (r.status === 200) {
-				r.text().then((t) => {
-					if (t === 'true') {
-						const states = manualStates
-						states.isSuccess = true
-						setState({ ...state, taskStates: states })
-					} else {
-						const states = manualStates
-						states.isUpToDate = true
-						setState({ ...state, taskStates: states })
-					}
-				})
-
-				return
-			}
-
 			if (r.status === 401) {
-				const states = manualStates
-				states.isUnAuth = true
-				setState({ ...state, taskStates: states })
+				setState({
+					...state,
+					alert: {
+						text: 'Unauthorized: Try logging out and logging back in.',
+						color: 'danger',
+					},
+				})
 
 				return
 			}
 
 			if (r.status === 500) {
-				r.text().then((t) => {
-					const states = manualStates
-					states.isFailed = true
-					setState({ ...state, taskStates: states })
+				r.text().then(() => {
+					setState({
+						...state,
+						alert: { text: 'Server Error', color: 'danger' },
+					})
 				})
+
+				return
 			}
+
+			await getLatestCommit()
+			await getLatestCommit()
 		})
 	}
 

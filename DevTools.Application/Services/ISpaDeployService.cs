@@ -1,11 +1,12 @@
 using System.Threading.Tasks;
+using DevTools.Application.Models;
 using FluentFTP;
 
 namespace DevTools.Application.Services
 {
     public interface ISpaDeployService
     {
-        Task<bool> Deploy();
-        Task<FtpClient> GetFtpClient();
+        Task<Commit?> Deploy();
+        Task<Commit> LoadCommitFromServer();
     }
 }

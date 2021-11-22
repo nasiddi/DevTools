@@ -16,24 +16,27 @@ namespace DevTools.Application.Services
     public class SpaDeployService : ISpaDeployService
     {
         private readonly IConfiguration _configuration;
-        public static readonly string ProjectName = "SPA";
-        public static readonly string RemoteTarget = "/spa_root";
-        public static readonly string DeploymentFile = "deployment.json";
+        private static readonly string ProjectName = "SPA";
+        private static readonly string RemoteTarget = "/spa_root";
+        private static readonly string DeploymentFile = "deployment.json";
 
         public SpaDeployService(IConfiguration configuration)
         {
             _configuration = configuration;
         }
         
-        public async Task<bool> Deploy()
+        public async Task<Commit?> Deploy()
         {
             var localProjectRoot = GetLocalProjectRoot();
-            HasChanged();
+            if (!HasChanged())
+            {
+                return null;
+            }
             var commit = GetLastCommit(localProjectRoot);
             await PersistCommit(commit: commit, localProjectRoot: localProjectRoot);
 
             await UpdateServer(localProjectRoot: localProjectRoot);
-            return true;
+            return commit;
         }
         
         private static string GetLocalProjectRoot()
@@ -48,6 +51,19 @@ namespace DevTools.Application.Services
         {
             var localProjectRoot = GetLocalProjectRoot();
             return RunCommand($"cd {localProjectRoot} && git pull") != "Already up to date.\n";
+        }
+        
+        public async Task<Commit> LoadCommitFromServer()
+        {
+            var client = await GetFtpClient();
+            await using var stream = new MemoryStream();
+            await client.DownloadAsync(stream,
+                Path.Join(RemoteTarget, DeploymentFile));
+            stream.Position = 0;
+            var reader = new StreamReader(stream);
+            string text = await reader.ReadToEndAsync();
+            var commit = JsonSerializer.Deserialize<Commit>(text);
+            return commit;
         }
         
         private static Commit GetLastCommit(string localProjectRoot)
@@ -105,7 +121,7 @@ namespace DevTools.Application.Services
             await client.DisconnectAsync();
         }
 
-        public async Task<FtpClient> GetFtpClient()
+        private async Task<FtpClient> GetFtpClient()
         {
             var authorization = _configuration.GetSection("FtpServerCredentials");
 
@@ -119,5 +135,7 @@ namespace DevTools.Application.Services
             await client.ConnectAsync();
             return client;
         }
+        
+        
     }
 }

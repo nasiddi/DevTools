@@ -9,6 +9,7 @@
         <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
         <AssemblyName>DevTools.Application</AssemblyName>
         <RootNamespace>DevTools.Application</RootNamespace>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>

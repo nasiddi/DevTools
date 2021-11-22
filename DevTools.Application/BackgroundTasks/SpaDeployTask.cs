@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using DevTools.Application.Models;
 using DevTools.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,8 +11,12 @@ namespace DevTools.Application.BackgroundTasks
     public class SpaDeployTask : IHostedService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        public bool IsEnabled { get; set; } = false;
-        public bool IsRunning { get; set; }
+        public bool IsEnabled { get; set; }
+        public bool IsRunning { get; private set; }
+        public bool RunImmediately { get; set; }
+        public bool HasChanged { get; private set; } = true;
+        public DateTime? LastRun { get; private set; }
+        public Commit? Commit { get; private set; }
 
         public SpaDeployTask(IServiceScopeFactory serviceScopeFactory)
         {
@@ -38,21 +43,24 @@ namespace DevTools.Application.BackgroundTasks
                     IsEnabled = false;
                 }
                 
-                if (!IsEnabled)
+                if (!IsEnabled && !RunImmediately)
                 {
                     await WaitForActivation(cancellationToken);
                     enableTime = DateTime.UtcNow;
                 }
-                
-                
-                if (SpaDeployService.HasChanged())
-                {
-                    IsRunning = true;
-                }
 
                 try
                 {
-                    await spaDeployService!.Deploy();
+                    var commit = await spaDeployService!.Deploy();
+                    if (commit != null)
+                    {
+                        Commit = commit;
+                        HasChanged = true;
+                    }
+                    else
+                    {
+                        HasChanged = false;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -61,9 +69,16 @@ namespace DevTools.Application.BackgroundTasks
                 }
 
                 IsRunning = false;
+                LastRun = DateTime.UtcNow;
                 
-
-                await Sleep(cancellationToken);
+                if (!RunImmediately)
+                {
+                    await Sleep(cancellationToken);
+                }
+                else
+                {
+                    RunImmediately = false;
+                }
             }
         }
         
@@ -71,7 +86,7 @@ namespace DevTools.Application.BackgroundTasks
         {
             var waitTask = Task.Run(function: async () =>
             {
-                while (!IsEnabled)
+                while (!IsEnabled && !RunImmediately)
                 {
                     await Task.Delay(millisecondsDelay: 5000, cancellationToken: cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
                 }

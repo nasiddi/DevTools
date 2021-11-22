@@ -30,20 +30,14 @@ namespace DevTools.Application.Controllers
         {
             try
             {
-                var client = await _spaDeployService.GetFtpClient();
-                await using var stream = new MemoryStream();
-                await client.DownloadAsync(stream,
-                    Path.Join(SpaDeployService.RemoteTarget, SpaDeployService.DeploymentFile));
-                stream.Position = 0;
-                var reader = new StreamReader(stream);
-                string text = await reader.ReadToEndAsync();
-                var commit = JsonSerializer.Deserialize<Commit>(text);
+                var spaDeployTask = _serviceProvider.GetService<SpaDeployTask>();
+                var commit = spaDeployTask!.Commit ?? await _spaDeployService.LoadCommitFromServer();
                 return Ok(commit);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return Ok(new Commit("Error fetching last commit", e.Message, new DateTime()));
+                return Ok(value: new Commit("Error fetching last commit", e.Message, new DateTime()));
             }
             
         }
@@ -52,9 +46,9 @@ namespace DevTools.Application.Controllers
         [Route("spa")]
         public  IActionResult DeploySpa()
         {
-            var task = _spaDeployService.Deploy();
+            var spaDeployTask = _serviceProvider.GetService<SpaDeployTask>();
+            spaDeployTask!.RunImmediately = true;
             return Ok();
-            
         }
 
         [HttpPost]
@@ -74,7 +68,9 @@ namespace DevTools.Application.Controllers
             return Ok(new BackgroundTaskStatus
             {
                 IsEnabled = spaDeployTask!.IsEnabled,
-                IsRunning = spaDeployTask.IsRunning
+                IsRunning = spaDeployTask.IsRunning,
+                HasChanged = spaDeployTask.HasChanged,
+                LastRun = spaDeployTask.LastRun
             });
         }
     }
@@ -83,5 +79,7 @@ namespace DevTools.Application.Controllers
     {
         public bool IsEnabled { get; set; }
         public bool IsRunning { get; set; }
+        public bool HasChanged { get; set; }
+        public DateTime? LastRun { get; set; }
     }
 }
