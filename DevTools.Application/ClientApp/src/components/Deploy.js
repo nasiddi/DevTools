@@ -20,18 +20,26 @@ export function Deploy() {
 		backgroundTask: {},
 	})
 
+	function getLocalDateTimeString(dateString) {
+		const date = new Date(dateString)
+
+		return `${date.toLocaleTimeString()} ${date.toLocaleDateString()}`
+	}
+
 	function getAlert(status) {
 		if (status?.isRunning) {
-			return { text: 'Uploading Files', color: 'info', showSpinner: true }
+			return { text: 'Task started', color: 'info', showSpinner: true }
 		}
 
 		if (status.lastRun === null) {
 			return defaultAlert
 		}
 
+		const lastRunString = getLocalDateTimeString(status.lastRun)
+
 		if (status?.hasChanged) {
 			return {
-				text: `Deployment completed at ${status.lastRun}.`,
+				text: `Deployment completed at ${lastRunString}.`,
 				color: 'success',
 			}
 		}
@@ -42,7 +50,7 @@ export function Deploy() {
 
 		if (!status?.isRunning) {
 			return {
-				text: `Last run at ${status.lastRun}. Already up to date.`,
+				text: `Last run at ${lastRunString}. Already up to date.`,
 				color: 'warning',
 			}
 		}
@@ -87,14 +95,6 @@ export function Deploy() {
 	}, [])
 
 	async function deploy() {
-		setState({
-			...state,
-			alert: {
-				text: 'Task started',
-				color: 'info',
-				showSpinner: true,
-			},
-		})
 		await post('deploy/spa').then(async (r) => {
 			if (r.status === 401) {
 				setState({
@@ -162,7 +162,7 @@ export function Deploy() {
 					<Row>
 						<Col>{commit.hash}</Col>
 						<Col>{commit.message}</Col>
-						<Col>{commit.date}</Col>
+						<Col>{getLocalDateTimeString(commit.date)}</Col>
 					</Row>
 					<Row>
 						<Col />
