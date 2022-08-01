@@ -1,16 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace DevTools.Application.Models
+namespace DevTools.Application.Models;
+
+public class HueColor
 {
-    public class HueColor
-    {
-        [Key]
-        public int HueId { get; set; }
-        [StringLength(20)]
-        public string Color { get; set; }
-        [StringLength(20)]
-        public string DefaultColor { get; set; }
-        [StringLength(20)]
-        public string Name { get; set; }
-    }
+    [Key]
+    public int HueId { get; set; }
+    [StringLength(20)]
+    public string Color { get; set; }
+    [StringLength(20)]
+    public string DefaultColor { get; set; }
+    [StringLength(20)]
+    public string Name { get; set; }
 }

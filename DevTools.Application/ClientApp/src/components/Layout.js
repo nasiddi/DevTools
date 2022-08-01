@@ -1,25 +1,29 @@
-import React, { Component } from 'react'
+/* eslint-disable react/react-in-jsx-scope */
 import { Container } from 'reactstrap'
 import { NavMenu } from './NavMenu'
 
-const urlsToHideTheMenu = ['/kids-number', '/number']
+const urlToHideTheMenu = '/file-download'
 
 export const DefaultLayout = (props) => {
 	return (
 		<div>
 			{/* eslint-disable-next-line no-restricted-globals */}
-			{urlsToHideTheMenu.includes(location.pathname) ? null : <NavMenu />}
+			{location.pathname.includes(urlToHideTheMenu) ? null : <NavMenu />}
 			<Container>{props.children}</Container>
 		</div>
 	)
 }
 
-export const NumberDisplayLayout = (props) => {
+export const CleanLayout = (props) => {
 	return (
 		<div>
 			<Container
-				fluid={true}
-				style={{ textAlignVertical: 'bottom', backgroundColor: 'red' }}
+				style={{
+					display: 'flex',
+					justifyContent: 'center',
+					alignItems: 'center',
+					paddingTop: 200,
+				}}
 			>
 				{props.children}
 			</Container>

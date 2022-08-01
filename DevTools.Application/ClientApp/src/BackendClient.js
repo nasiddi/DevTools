@@ -9,6 +9,16 @@ export async function post(endpoint, body) {
 	})
 }
 
+export async function postForm(endpoint, body) {
+	return await fetch(endpoint, {
+		method: 'POST',
+		headers: {
+			ApiKey: localStorage.getItem('apiKey'),
+		},
+		body: body,
+	})
+}
+
 export async function get(endpoint) {
 	return await fetch(endpoint, {
 		method: 'GET',

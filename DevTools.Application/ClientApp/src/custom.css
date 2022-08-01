@@ -27,3 +27,7 @@ code {
 .number {
   font-size: 50vw;
 }
+
+a:hover {
+  color: #cbc8c8;
+}

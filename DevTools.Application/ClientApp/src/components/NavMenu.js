@@ -77,6 +77,15 @@ export class NavMenu extends Component {
 										Hue Colors
 									</NavLink>
 								</NavItem>
+								<NavItem>
+									<NavLink
+										tag={Link}
+										className="text-dark"
+										to="/file-upload"
+									>
+										File Upload
+									</NavLink>
+								</NavItem>
 							</ul>
 						</Collapse>
 					</Container>

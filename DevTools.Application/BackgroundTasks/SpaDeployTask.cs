@@ -6,105 +6,104 @@ using DevTools.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace DevTools.Application.BackgroundTasks
+namespace DevTools.Application.BackgroundTasks;
+
+public class SpaDeployTask : IHostedService
 {
-    public class SpaDeployTask : IHostedService
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    public bool IsEnabled { get; set; }
+    public bool IsRunning { get; set; }
+    public bool RunImmediately { get; set; }
+    public bool HasChanged { get; private set; } = true;
+    public DateTime? LastRun { get; private set; }
+    public Commit? Commit { get; private set; }
+
+    public SpaDeployTask(IServiceScopeFactory serviceScopeFactory)
     {
-        private readonly IServiceScopeFactory _serviceScopeFactory;
-        public bool IsEnabled { get; set; }
-        public bool IsRunning { get; set; }
-        public bool RunImmediately { get; set; }
-        public bool HasChanged { get; private set; } = true;
-        public DateTime? LastRun { get; private set; }
-        public Commit? Commit { get; private set; }
-
-        public SpaDeployTask(IServiceScopeFactory serviceScopeFactory)
-        {
-            _serviceScopeFactory = serviceScopeFactory;
-        }
+        _serviceScopeFactory = serviceScopeFactory;
+    }
         
-        public Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        var task = ExecuteAsync(cancellationToken: cancellationToken);
+        return task.IsCompleted ? task : Task.CompletedTask;
+    }
+
+    private async Task ExecuteAsync(CancellationToken cancellationToken)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var spaDeployService = scope.ServiceProvider.GetService<ISpaDeployService>();
+
+        var enableTime = DateTime.UtcNow;
+
+        while (!cancellationToken.IsCancellationRequested)
         {
-            var task = ExecuteAsync(cancellationToken: cancellationToken);
-            return task.IsCompleted ? task : Task.CompletedTask;
-        }
-
-        private async Task ExecuteAsync(CancellationToken cancellationToken)
-        {
-            using var scope = _serviceScopeFactory.CreateScope();
-            var spaDeployService = scope.ServiceProvider.GetService<ISpaDeployService>();
-
-            var enableTime = DateTime.UtcNow;
-
-            while (!cancellationToken.IsCancellationRequested)
+            if (enableTime < DateTime.UtcNow.AddHours(-3))
             {
-                if (enableTime < DateTime.UtcNow.AddHours(-3))
-                {
-                    IsEnabled = false;
-                }
+                IsEnabled = false;
+            }
                 
-                if (!IsEnabled && !RunImmediately)
-                {
-                    await WaitForActivation(cancellationToken);
-                    enableTime = DateTime.UtcNow;
-                }
+            if (!IsEnabled && !RunImmediately)
+            {
+                await WaitForActivation(cancellationToken);
+                enableTime = DateTime.UtcNow;
+            }
 
-                IsRunning = true;
+            IsRunning = true;
 
-                try
+            try
+            {
+                var commit = await spaDeployService!.Deploy();
+                if (commit != null)
                 {
-                    var commit = await spaDeployService!.Deploy();
-                    if (commit != null)
-                    {
-                        Commit = commit;
-                        HasChanged = true;
-                    }
-                    else
-                    {
-                        HasChanged = false;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine(e.StackTrace);
-                }
-
-                IsRunning = false;
-                LastRun = DateTime.UtcNow;
-                
-                if (!RunImmediately)
-                {
-                    await Sleep(cancellationToken);
+                    Commit = commit;
+                    HasChanged = true;
                 }
                 else
                 {
-                    RunImmediately = false;
+                    HasChanged = false;
                 }
             }
-        }
-        
-        private async Task WaitForActivation(CancellationToken cancellationToken)
-        {
-            var waitTask = Task.Run(function: async () =>
+            catch (Exception e)
             {
-                while (!IsEnabled && !RunImmediately)
-                {
-                    await Task.Delay(millisecondsDelay: 5000, cancellationToken: cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-                }
-            }, cancellationToken: cancellationToken);
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
+            }
 
-            await Task.WhenAny(task1: waitTask, task2: Task.Delay(millisecondsDelay: -1, cancellationToken: cancellationToken));
+            IsRunning = false;
+            LastRun = DateTime.UtcNow;
+                
+            if (!RunImmediately)
+            {
+                await Sleep(cancellationToken);
+            }
+            else
+            {
+                RunImmediately = false;
+            }
         }
-
-        public Task StopAsync(CancellationToken cancellationToken)  
+    }
+        
+    private async Task WaitForActivation(CancellationToken cancellationToken)
+    {
+        var waitTask = Task.Run(function: async () =>
         {
-            return Task.CompletedTask;
-        }
+            while (!IsEnabled && !RunImmediately)
+            {
+                await Task.Delay(millisecondsDelay: 5000, cancellationToken: cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+            }
+        }, cancellationToken: cancellationToken);
 
-        private async Task Sleep(CancellationToken cancellationToken)
-        {
-            await Task.Delay(millisecondsDelay: 5000, cancellationToken: cancellationToken);
-        }
+        await Task.WhenAny(task1: waitTask, task2: Task.Delay(millisecondsDelay: -1, cancellationToken: cancellationToken));
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)  
+    {
+        return Task.CompletedTask;
+    }
+
+    private async Task Sleep(CancellationToken cancellationToken)
+    {
+        await Task.Delay(millisecondsDelay: 5000, cancellationToken: cancellationToken);
     }
 }
