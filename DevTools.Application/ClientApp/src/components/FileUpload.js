@@ -86,7 +86,7 @@ export const FileUpload = () => {
 									onClick={() => {
 										navigator.clipboard.writeText(
 											`${location.protocol}
-												//${location.host}/${r.guid}`
+												//${location.host}/file/${r.guid}`
 										)
 									}}
 								>
