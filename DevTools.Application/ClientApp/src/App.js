@@ -10,6 +10,8 @@ import AuthRoute from './auth/AuthRoute'
 import { FileUpload } from './components/FileUpload'
 import { FileDownload } from './components/FileDownload'
 import { Files } from './components/Files'
+import { Characters } from './components/Citadels/Characters'
+import { Game } from './components/Citadels/Game'
 
 export default function App() {
 	return (
@@ -36,6 +38,20 @@ export default function App() {
 					</Route>
 					<Route exact path="/files" element={<AuthRoute />}>
 						<Route exact path="/files" element={<Files />} />
+					</Route>
+					<Route exact path="/citadels/game" element={<AuthRoute />}>
+						<Route exact path="/citadels/game" element={<Game />} />
+					</Route>
+					<Route
+						exact
+						path="/citadels/character-configuration"
+						element={<AuthRoute />}
+					>
+						<Route
+							exact
+							path="/citadels/character-configuration"
+							element={<Characters />}
+						/>
 					</Route>
 				</Routes>
 			</DefaultLayout>

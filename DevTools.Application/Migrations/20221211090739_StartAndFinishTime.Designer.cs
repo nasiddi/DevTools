@@ -4,14 +4,16 @@ using DevTools.Application.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DevTools.Application.Migrations
 {
     [DbContext(typeof(DevToolsContext))]
-    partial class DevToolsContextModelSnapshot : ModelSnapshot
+    [Migration("20221211090739_StartAndFinishTime")]
+    partial class StartAndFinishTime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,7 +52,7 @@ namespace DevTools.Application.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime?>("FinishTime")
+                    b.Property<DateTime>("FinishTime")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("StartTime")

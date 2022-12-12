@@ -4,14 +4,16 @@ using DevTools.Application.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DevTools.Application.Migrations
 {
     [DbContext(typeof(DevToolsContext))]
-    partial class DevToolsContextModelSnapshot : ModelSnapshot
+    [Migration("20221209132330_Citadels")]
+    partial class Citadels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,12 +52,6 @@ namespace DevTools.Application.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime?>("FinishTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
                     b.ToTable("Games");
@@ -84,9 +80,6 @@ namespace DevTools.Application.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -121,7 +114,8 @@ namespace DevTools.Application.Migrations
 
                     b.HasIndex("GameId");
 
-                    b.HasIndex("PlayerId");
+                    b.HasIndex("PlayerId")
+                        .IsUnique();
 
                     b.ToTable("PlayerResults");
                 });
@@ -149,7 +143,8 @@ namespace DevTools.Application.Migrations
 
                     b.HasIndex("HandId");
 
-                    b.HasIndex("PlayerId");
+                    b.HasIndex("PlayerId")
+                        .IsUnique();
 
                     b.ToTable("Turns");
                 });
@@ -280,8 +275,8 @@ namespace DevTools.Application.Migrations
                         .IsRequired();
 
                     b.HasOne("DevTools.Application.Models.Citadels.Player", "Player")
-                        .WithMany("PlayerResults")
-                        .HasForeignKey("PlayerId")
+                        .WithOne("PlayerResult")
+                        .HasForeignKey("DevTools.Application.Models.Citadels.PlayerResult", "PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -299,8 +294,8 @@ namespace DevTools.Application.Migrations
                         .IsRequired();
 
                     b.HasOne("DevTools.Application.Models.Citadels.Player", "Player")
-                        .WithMany("Turns")
-                        .HasForeignKey("PlayerId")
+                        .WithOne("Turn")
+                        .HasForeignKey("DevTools.Application.Models.Citadels.Turn", "PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -323,9 +318,11 @@ namespace DevTools.Application.Migrations
 
             modelBuilder.Entity("DevTools.Application.Models.Citadels.Player", b =>
                 {
-                    b.Navigation("PlayerResults");
+                    b.Navigation("PlayerResult")
+                        .IsRequired();
 
-                    b.Navigation("Turns");
+                    b.Navigation("Turn")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

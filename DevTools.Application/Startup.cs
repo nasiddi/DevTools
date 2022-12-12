@@ -46,6 +46,7 @@ public class Startup
 
         services.AddScoped<ISpaDeployService, SpaDeployService>();
         services.AddScoped<IFileService, FileService>();
+        services.AddScoped<ICitadelsService, CitadelsService>();
         services.AddControllersWithViews();
         // In production, the React files will be served from this directory
         services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
