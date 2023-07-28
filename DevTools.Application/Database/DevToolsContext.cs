@@ -36,30 +36,20 @@ public class DevToolsContext : DbContext
         builder.Entity<File>()
             .HasIndex(e => e.Guid)
             .IsUnique();
-
-        // builder.Entity<Game>()
-        //     .HasMany<Hand>()
-        //     .WithOne(e => e.Game)
-        //     .HasForeignKey(e => e.GameId);
-        //
-        // builder.Entity<Hand>()
-        //     .HasMany<Turn>()
-        //     .WithOne(e => e.Hand)
-        //     .HasForeignKey(e => e.HandId);
-        //
-        // builder.Entity<Turn>()
-        //     .HasOne<Player>()
-        //     .WithOne(e => e.Turn)
-        //     .HasForeignKey<Turn>(e => e.PlayerId);
-        //
-        // builder.Entity<Game>()
-        //     .HasMany<PlayerResult>()
-        //     .WithOne(e => e.Game)
-        //     .HasForeignKey(e => e.GameId);
-        //
-        // builder.Entity<PlayerResult>()
-        //     .HasOne<Player>()
-        //     .WithOne(e => e.PlayerResult)
-        //     .HasForeignKey<PlayerResult>(e => e.PlayerId);
+        
+        builder.Entity<Turn>()
+            .HasOne(x => x.Player)
+            .WithMany(x => x.Turns)
+            .HasForeignKey(x => x.PlayerId);
+        
+        builder.Entity<Turn>()
+            .HasOne(x => x.Hand)
+            .WithMany(x => x.Turns)
+            .HasForeignKey(x => x.HandId);
+        
+        builder.Entity<Hand>()
+            .HasOne(x => x.Game)
+            .WithMany(x => x.Hands)
+            .HasForeignKey(x => x.GameId);
     }
 }

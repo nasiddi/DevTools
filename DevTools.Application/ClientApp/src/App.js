@@ -12,6 +12,7 @@ import { FileDownload } from './components/FileDownload'
 import { Files } from './components/Files'
 import { Characters } from './components/Citadels/Characters'
 import { Game } from './components/Citadels/Game'
+import { Statistics } from './components/Citadels/Statistics'
 
 export default function App() {
 	return (
@@ -41,6 +42,17 @@ export default function App() {
 					</Route>
 					<Route exact path="/citadels/game" element={<AuthRoute />}>
 						<Route exact path="/citadels/game" element={<Game />} />
+					</Route>
+					<Route
+						exact
+						path="/citadels/statistics"
+						element={<AuthRoute />}
+					>
+						<Route
+							exact
+							path="/citadels/statistics"
+							element={<Statistics />}
+						/>
 					</Route>
 					<Route
 						exact

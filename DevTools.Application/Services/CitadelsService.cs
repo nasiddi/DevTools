@@ -22,6 +22,7 @@ public interface ICitadelsService
     IReadOnlyList<Character> GetAllCharacters();
     Task SubmitTurns(IReadOnlyList<NewTurn> turns);
     Task EndGame(IReadOnlyList<NewPlayerResult> playerResults);
+    Task<Statistics> GetStatistics();
 }
 
 public class CitadelsService : ICitadelsService
@@ -123,14 +124,14 @@ public class CitadelsService : ICitadelsService
 
         return await dbContext.Players.Where(p => p.IsActive).ToListAsync();
     }
-    
+
     public async Task SubmitTurns(IReadOnlyList<NewTurn> turns)
     {
         var dbContext = _serviceScopeFactory.CreateScope().ServiceProvider
             .GetRequiredService<DevToolsContext>();
 
         var game = await GetActiveGame(dbContext);
-        
+
         var hand = new Hand
         {
             GameId = game!.Id,
@@ -159,10 +160,132 @@ public class CitadelsService : ICitadelsService
             HasWon = p.HasWon,
             Points = p.Points,
         }).ToList();
-        
+
         game.FinishTime = DateTime.UtcNow;
-        
+
         await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<Statistics> GetStatistics()
+    {
+        var dbContext = _serviceScopeFactory.CreateScope().ServiceProvider
+            .GetRequiredService<DevToolsContext>();
+
+        var statisticsCharacters = await GetStatisticsCharacters(dbContext);
+
+        var games = await dbContext.Games
+            .Include(e => e.PlayerResults)
+            .ThenInclude(e => e.Player)
+            .Include(e => e.Hands)
+            .ToListAsync();
+
+        var statisticsGames = games.Select(e => new StatisticsGame
+            {
+                StartTime = e.StartTime,
+                FinishTime = e.FinishTime,
+                PlayerPoints = e.PlayerResults.Select(r => new PlayerPoints
+                {
+                    PlayerName = r.Player.Name,
+                    Points = r.Points
+                }).ToImmutableList(),
+                NumberOfHands = e.Hands.Count
+            })
+            .OrderBy(e => e.StartTime)
+            .ToImmutableList();
+
+        return new Statistics
+        {
+            StatisticsCharacters = statisticsCharacters,
+            StatisticsGames = statisticsGames
+        };
+    }
+
+    private async Task<List<StatisticsCharacter>> GetStatisticsCharacters(DevToolsContext dbContext)
+    {
+        var turns = await dbContext.Turns
+            .Include(e => e.Hand)
+            .ThenInclude(e => e.Game)
+            .ThenInclude(e => e.PlayerResults)
+            .Include(e => e.Player)
+            .ToListAsync();
+
+        var characters = await dbContext.Characters.ToListAsync();
+
+        var statisticsTurns = turns.Select(turn =>
+        {
+            var game = turn.Hand.Game;
+
+            var character = characters.Single(e =>
+                e.CharacterNumber == turn.CharacterNumber
+                && e.ActivationDate < game.StartTime
+                && (e.DeactivationDate is null ||
+                    e.DeactivationDate > game.FinishTime));
+
+            return new StatisticsTurn(
+                character.CharacterType,
+                character.CharacterNumber,
+                turn.Hand.Game.PlayerResults.Single(r => r.PlayerId == turn.PlayerId).HasWon,
+                turn.Player.Name,
+                turn.HandId,
+                turn.TargetCharacterNumber
+            );
+        }).ToImmutableList();
+
+
+        var statisticsCharacters = statisticsTurns.GroupBy(e => e.CharacterType)
+            .OrderBy(e => e.Key)
+            .Select(e => new StatisticsCharacter
+            {
+                CharacterName = e.Key.ToString(),
+                CharacterPlayed = e.GroupBy(g => g.PlayerName).Select(MapCharacterPlayed).ToImmutableList(),
+                CharacterAttacks = e.GroupBy(g => g.PlayerName).Select(g => MapCharacterAttack(g, statisticsTurns)).ToImmutableList()
+            }).ToList();
+        return statisticsCharacters;
+    }
+
+    private CharacterAttack MapCharacterAttack(
+        IGrouping<string, StatisticsTurn> group,
+        ImmutableList<StatisticsTurn> statisticsTurns)
+    {
+        var attacks = group.Where(e => e.TargetCharacterNumber > 0).ToImmutableList();
+
+        if (attacks.Count == 0)
+        {
+            return new CharacterAttack
+            {
+                PlayerName = group.Key,
+                SuccessfulAttacks = 0,
+                UnsuccessfulAttacks = 0
+            };
+        }
+        
+        var successful = attacks.Count(IsSuccessfulAttack);
+
+        return new CharacterAttack
+        {
+            PlayerName = group.Key,
+            SuccessfulAttacks = successful,
+            UnsuccessfulAttacks = attacks.Count - successful
+        };
+
+        bool IsSuccessfulAttack(StatisticsTurn turn)
+        {
+            var characterNumbersInHand = statisticsTurns.Where(t => t.HandId == turn.HandId).Select(t => t.CharacterNumber).ToImmutableList();
+            return characterNumbersInHand
+                .Contains(turn.TargetCharacterNumber);
+        }
+    }
+
+    private CharacterPlayed MapCharacterPlayed(IGrouping<string, StatisticsTurn> group)
+    {
+        var won = group.Count(e => e.HasWon);
+
+        return new CharacterPlayed
+        {
+            PlayerName = group.Key,
+            PlayedInWonGame = won,
+            PlayedInLostGame = group.Count() - won
+        };
     }
 
     private void ValidateCharacters(IReadOnlyList<Character> characters)
@@ -285,4 +408,12 @@ public class CitadelsService : ICitadelsService
                 CharacterType = CharacterType.Queen,
             });
     }
+
+    private record StatisticsTurn(
+        CharacterType CharacterType,
+        int CharacterNumber,
+        bool HasWon,
+        string PlayerName,
+        int HandId,
+        int TargetCharacterNumber);
 }

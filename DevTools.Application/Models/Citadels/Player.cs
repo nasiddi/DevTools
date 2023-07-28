@@ -10,8 +10,8 @@ public class Player
     [StringLength(30)]
     public string Name { get; set; } = string.Empty;
     public bool IsActive { get; set; }
-    
-    public ICollection<Turn> Turns { get; set; } = ImmutableList<Turn>.Empty;
-    public ICollection<PlayerResult> PlayerResults { get; set; } = ImmutableList<PlayerResult>.Empty;
+
+    public ICollection<Turn> Turns { get; set; } = new List<Turn>();
+    public ICollection<PlayerResult> PlayerResults { get; set; } = new List<PlayerResult>();
 
 }
