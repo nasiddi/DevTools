@@ -13,6 +13,7 @@ import { Files } from './components/Files'
 import { Characters } from './components/Citadels/Characters'
 import { Game } from './components/Citadels/Game'
 import { Statistics } from './components/Citadels/Statistics'
+import { MasterListConverter } from './components/MasterListConverter'
 
 export default function App() {
 	return (
@@ -73,6 +74,11 @@ export default function App() {
 						exact
 						path="/file-download/:id"
 						element={<FileDownload />}
+					/>
+					<Route
+						exact
+						path="/list-converter"
+						element={<MasterListConverter />}
 					/>
 				</Routes>
 			</CleanLayout>

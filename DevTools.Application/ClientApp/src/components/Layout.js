@@ -2,13 +2,17 @@
 import { Container } from 'reactstrap'
 import { NavMenu } from './NavMenu'
 
-const urlToHideTheMenu = '/file-download'
+const urlsToHideTheMenu = ['/file-download', 'list-converter']
 
 export const DefaultLayout = (props) => {
 	return (
 		<div>
 			{/* eslint-disable-next-line no-restricted-globals */}
-			{location.pathname.includes(urlToHideTheMenu) ? null : <NavMenu />}
+			{urlsToHideTheMenu.some((urlToHideTheMenu) =>
+				location.pathname.includes(urlToHideTheMenu)
+			) ? null : (
+				<NavMenu />
+			)}
 			<Container>{props.children}</Container>
 		</div>
 	)
