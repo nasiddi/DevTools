@@ -41,13 +41,14 @@ export const MasterListConverter = () => {
 			if (res.status !== 200) {
 				throw new Error('Status not ok')
 			}
-			const url = window.URL.createObjectURL(new Blob([res.data]))
-			const link = document.createElement('a')
+
+			const blob = new Blob([await res.text()], { type: 'text/csv' })
+			const url = URL.createObjectURL(blob)
+			const link = document.createElement('A')
 			link.href = url
-			link.setAttribute('download', 'masterlist.csv')
-			document.body.appendChild(link)
+			link.download = 'masterlist.csv'
 			link.click()
-			link.remove()
+
 			setState({
 				...state,
 				showProgress: false,
