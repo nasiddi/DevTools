@@ -43,7 +43,7 @@ public class MasterListRow
     public string Middle_name { get; set; }
     public string Title { get; set; }
     public string Paytype { get; set; }
-    public DateTime? Date_of_birth { get; set; }
+    public string? Date_of_birth { get; set; }
     public string Gender { get; set; }
     public string Airline_assosiated_with_frequent_flyer_programm { get; set; }
     public string Frequent_flyer_number { get; set; }
@@ -88,8 +88,8 @@ public class MasterListRowClassMap : ClassMap<MasterListRow>
         Map(m => m.BookingDate).Name("Bu.datum");
         Map(m => m.BookingNumber).Name("Bu.nr.");
         Map(m => m.InvoiceNumber).Name("Re.nr.");
-        Map(m => m.TripStartDate).Name("Reisedatum von");
-        Map(m => m.TripEndDate).Name("Reisedatum bis");
+        Map(m => m.TripStartDate).Name("Reisedatum von").TypeConverter<CustomDateTimeConverter>();
+        Map(m => m.TripEndDate).Name("Reisedatum bis").TypeConverter<CustomDateTimeConverter>();
         Map(m => m.NumberOfParticipants).Name("Gebuchte teilnehmer");
         Map(m => m.FormOfAddress).Name("Anrede");
         Map(m => m.EmptyTitle).Name("Titel").NameIndex(0);
@@ -116,7 +116,7 @@ public class MasterListRowClassMap : ClassMap<MasterListRow>
         Map(m => m.Middle_name).Name("Middle_name");
         Map(m => m.Title).Name("Title");
         Map(m => m.Paytype).Name("Paytype");
-        Map(m => m.Date_of_birth).Name("Date_of_birth");
+        Map(m => m.Date_of_birth).Name("Date_of_birth").TypeConverter<CustomDateTimeConverter>();
         Map(m => m.Gender).Name("Gender");
         Map(m => m.Airline_assosiated_with_frequent_flyer_programm).Name("Airline_assosiated_with_frequent_flyer_programm");
         Map(m => m.Frequent_flyer_number).Name("Frequent_flyer_number");
@@ -163,7 +163,7 @@ public class CustomDateTimeConverter : DefaultTypeConverter
         }
         CultureInfo provider = CultureInfo.InvariantCulture;
         
-        var result = DateTime.Parse(text);
+        var result = DateTime.ParseExact(text, "dd.MM.yyyy", CultureInfo.InvariantCulture);
 
         return result;
     }
