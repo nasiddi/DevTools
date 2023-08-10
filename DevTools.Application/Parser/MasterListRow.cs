@@ -116,7 +116,7 @@ public class MasterListRowClassMap : ClassMap<MasterListRow>
         Map(m => m.Middle_name).Name("Middle_name");
         Map(m => m.Title).Name("Title");
         Map(m => m.Paytype).Name("Paytype");
-        Map(m => m.Date_of_birth).Name("Date_of_birth").TypeConverter<CustomDateTimeConverter>();
+        Map(m => m.Date_of_birth).Name("Date_of_birth");
         Map(m => m.Gender).Name("Gender");
         Map(m => m.Airline_assosiated_with_frequent_flyer_programm).Name("Airline_assosiated_with_frequent_flyer_programm");
         Map(m => m.Frequent_flyer_number).Name("Frequent_flyer_number");
