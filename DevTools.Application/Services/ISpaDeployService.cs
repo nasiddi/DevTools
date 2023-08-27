@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using DevTools.Application.Models;
-using FluentFTP;
 
 namespace DevTools.Application.Services;
 

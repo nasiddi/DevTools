@@ -2,12 +2,22 @@ import React, { useState } from 'react'
 import Button from '@material-ui/core/Button'
 import { postForm } from '../BackendClient'
 import { Alert } from '@material-ui/lab'
-import { Grid } from '@material-ui/core'
+import { Checkbox, FormControlLabel, FormGroup, Grid } from '@material-ui/core'
 
 export const MasterListConverter = () => {
 	const [state, setState] = useState({
 		showProgress: false,
 		files: [],
+		filetypes: [
+			{
+				name: 'Feriendorf Masterlist',
+				isSelected: false,
+			},
+			{
+				name: 'Flight List',
+				isSelected: false,
+			},
+		],
 		alert: {
 			level: 'success',
 			message: '',
@@ -15,6 +25,22 @@ export const MasterListConverter = () => {
 	})
 
 	const convert = async (e) => {
+		const fileTypes = state.filetypes
+			.filter((e) => e.isSelected)
+			.map((e) => e.name.replace(' ', ''))
+
+		if (fileTypes.length === 0) {
+			setState({
+				...state,
+				alert: {
+					level: 'error',
+					message: 'At least one file type needs to be selected',
+				},
+			})
+
+			return
+		}
+
 		setState({ ...state, showProgress: true })
 		const file = Array.from(e.target.files)[0]
 
@@ -37,16 +63,27 @@ export const MasterListConverter = () => {
 		formData.append('file', file)
 
 		try {
-			const res = await postForm('ListConversion', formData)
+			const res = await postForm(
+				`ListConversion?fileTypes=${fileTypes.join('&fileTypes=')}`,
+				formData
+			)
 			if (res.status !== 200) {
 				throw new Error('Status not ok')
 			}
 
-			const blob = new Blob([await res.text()], { type: 'text/csv' })
-			const url = URL.createObjectURL(blob)
-			const link = document.createElement('A')
+			const data = await res.blob()
+			const url = window.URL.createObjectURL(data)
+			const link = document.createElement('a')
 			link.href = url
-			link.download = 'masterlist.csv'
+
+			const filename = res.headers
+				.get('content-disposition')
+				.split(';')[1]
+				.replace('filename=', '')
+				.trim()
+
+			link.setAttribute('download', filename)
+			document.body.appendChild(link)
 			link.click()
 
 			setState({
@@ -55,8 +92,7 @@ export const MasterListConverter = () => {
 				files: [],
 				alert: {
 					level: 'success',
-					message:
-						'Conversion successful. File downloaded as masterlist.csv',
+					message: `Conversion successful. File downloaded as ${filename}`,
 				},
 			})
 		} catch (ex) {
@@ -70,6 +106,17 @@ export const MasterListConverter = () => {
 				},
 			})
 		}
+	}
+
+	function handleCheckbox({ currentTarget }) {
+		console.log(event)
+
+		const fileTypes = state.filetypes
+		const fileType = fileTypes.find((e) => e.name === currentTarget.name)
+
+		fileType.isSelected = currentTarget.checked
+
+		setState({ ...state, fileTypes })
 	}
 
 	return (
@@ -101,6 +148,24 @@ export const MasterListConverter = () => {
 						Select exported csv
 					</Button>
 				</label>
+			</Grid>
+			<Grid item xs={12}>
+				<FormGroup>
+					{state.filetypes.map((t) => (
+						<FormControlLabel
+							key={t.name}
+							control={
+								<Checkbox
+									checked={t.isSelected}
+									onChange={handleCheckbox}
+									name={t.name}
+									color="primary"
+								/>
+							}
+							label={t.name}
+						/>
+					))}
+				</FormGroup>
 			</Grid>
 			<Grid item xs={12}>
 				{state.alert.message.length > 0 ? (

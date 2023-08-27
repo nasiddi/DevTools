@@ -26,6 +26,8 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.1.6" />
         <PackageReference Include="Q42.HueApi" Version="3.18.1" />
         <PackageReference Include="Q42.HueApi.ColorConverters" Version="3.18.1" />
+        <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+        <PackageReference Include="System.Security.Cryptography.Pkcs" Version="4.7.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -35,6 +37,9 @@
         <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
         <None Include="Services\ISpaDeployService.cs" />
         <None Include="Services\SpaDeployService.cs" />
+        <None Update="Converters\FlightList\flightlist_lhg.xlsx">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
