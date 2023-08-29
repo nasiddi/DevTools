@@ -7,7 +7,7 @@ namespace DevTools.Application.Converters.HolidayVillage;
 
 public class MasterListExporter
 {
-    public static ImmutableList<LufthansaGroupPaxExportRow> ExportStarAlliancePaxExportRows()
+    public static ImmutableList<LufthansaGroupPaxExportRow> ExportLufthansaGroupPaxExportRows()
     {
         return ImmutableList<LufthansaGroupPaxExportRow>.Empty;
     }

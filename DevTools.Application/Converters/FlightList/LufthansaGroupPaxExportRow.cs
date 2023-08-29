@@ -7,67 +7,67 @@ namespace DevTools.Application.Converters.FlightList;
 
 public class LufthansaGroupPaxExportRow
 {
-    [StarAlliance("S.No.", 1)]
+    [LufthansaGroup("S.No.", 1)]
     public int Index { get; set; }
     
-    [StarAlliance("Last name", 2)]
+    [LufthansaGroup("Last name", 2)]
     public string LastName { get; set; }
     
-    [StarAlliance("First name", 3)]
+    [LufthansaGroup("First name", 3)]
     public string FirstName { get; set; }
     
-    [StarAlliance("Middle name", 4)]
+    [LufthansaGroup("Middle name", 4)]
     public string? MiddleName { get; set; }
     
-    [StarAlliance("Title", 5)]
+    [LufthansaGroup("Title", 5)]
     public string Title { get; set; }
     
-    [StarAlliance("PAX type", 6)]
+    [LufthansaGroup("PAX type", 6)]
     public string? PaxType { get; set; }
     
-    [StarAlliance("Date of birth", 7)]
+    [LufthansaGroup("Date of birth", 7)]
     public string? DateOfBirth { get; set; }
     
-    [StarAlliance("Gender", 8)]
+    [LufthansaGroup("Gender", 8)]
     public string? Gender { get; set; }
     
-    [StarAlliance("Airline associated with frequent flyer program", 9)]
+    [LufthansaGroup("Airline associated with frequent flyer program", 9)]
     public string? FrequentFlyerProgram { get; set; }
     
-    [StarAlliance("Frequent flyer number", 10)]
+    [LufthansaGroup("Frequent flyer number", 10)]
     public string? FrequentFlyerNumber { get; set; }
     
-    [StarAlliance("Infant last name", 11)]
+    [LufthansaGroup("Infant last name", 11)]
     public string? InfantLastName { get; set; }
     
-    [StarAlliance("Infant first name", 12)]
+    [LufthansaGroup("Infant first name", 12)]
     public string? InfantFirstName { get; set; }
     
-    [StarAlliance("Infant date of birth", 13)]
+    [LufthansaGroup("Infant date of birth", 13)]
     public string? InfantDateOfBirth { get; set; }
     
-    [StarAlliance("Associated extra seats", 14)]
+    [LufthansaGroup("Associated extra seats", 14)]
     public string? AssociatedExtraSeat { get; set; }
     
-    [StarAlliance("Travel document type", 15)]
+    [LufthansaGroup("Travel document type", 15)]
     public string? TravelDocumentType { get; set; }
     
-    [StarAlliance("Document issuing country", 16)]
+    [LufthansaGroup("Document issuing country", 16)]
     public string? DocumentIssuingCountry { get; set; }
     
-    [StarAlliance("Country code", 17)]
+    [LufthansaGroup("Country code", 17)]
     public string? CountryCode { get; set; }
     
-    [StarAlliance("Travel document number ", 18)]
+    [LufthansaGroup("Travel document number ", 18)]
     public string? TravelDocumentNumber { get; set; }
     
-    [StarAlliance("Passenger nationality", 19)]
+    [LufthansaGroup("Passenger nationality", 19)]
     public string? PassengerNationality { get; set; }
     
-    [StarAlliance("Code of nationality", 20)]
+    [LufthansaGroup("Code of nationality", 20)]
     public string? CodeOfNationality { get; set; }
     
-    [StarAlliance("Date of expiry", 21)]
+    [LufthansaGroup("Date of expiry", 21)]
     public string? ExpirationDate { get; set; }
 }
 
@@ -90,9 +90,9 @@ public class FlightListDateTimeConverter : DefaultTypeConverter
 }
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class StarAllianceAttribute : Attribute
+public sealed class LufthansaGroupAttribute : Attribute
 {
-    public StarAllianceAttribute(
+    public LufthansaGroupAttribute(
         string title,
         int position)
     {

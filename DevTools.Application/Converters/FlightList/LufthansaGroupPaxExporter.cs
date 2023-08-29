@@ -9,7 +9,7 @@ using ratio_list_converter.Parser;
 
 namespace DevTools.Application.Converters.FlightList;
 
-public record StarAlliancePax(
+public record LufthansaGroupPax(
     string? FrequentFlyerProgram,
     string? FrequentFlyerNumber,
     Person Person,
@@ -24,7 +24,7 @@ public record Person(
 
 public class LufthansaGroupPaxExporter
 {
-    public static ConvertedFile ExportStarAlliancePaxExportRows(KeyValuePair<Flight, List<StarAlliancePax>> paxList)
+    public static ConvertedFile ExportLufthansaGroupPaxExportRows(KeyValuePair<Flight, List<LufthansaGroupPax>> paxList)
 
     {
         var passengers = paxList.Value.Select((e, index) =>
@@ -71,7 +71,7 @@ public class LufthansaGroupPaxExporter
 
         var columns = typeof(LufthansaGroupPaxExportRow)
             .GetProperties()
-            .Select(i => (ColumnData: i, ColumnMeta: i.GetCustomAttribute<StarAllianceAttribute>()))
+            .Select(i => (ColumnData: i, ColumnMeta: i.GetCustomAttribute<LufthansaGroupAttribute>()))
             .Where(i => i.ColumnMeta != null)
             .Select(i => (ColumnData: i.ColumnData, ColumnMeta: i.ColumnMeta!))
             .ToImmutableList();

@@ -7,7 +7,7 @@ namespace DevTools.Application.Converters.FlightList;
 
 public static class LufthansaGroupPaxConverter
 {
-    public static ImmutableList<ConvertedFile> ConvertToStarAlliancePax(IImmutableList<MasterListRow> records)
+    public static ImmutableList<ConvertedFile> ConvertToLufthansaGroupPax(IImmutableList<MasterListRow> records)
     {
         var bookings = MasterListParser.Parse(records);
         var sortedBookings = bookings.OrderBy(e => e.Passangers.Min(p => p.FamilyName)).ToImmutableList();
@@ -15,7 +15,7 @@ public static class LufthansaGroupPaxConverter
         var distinctFlights = sortedBookings.SelectMany(e => e.Passangers.SelectMany(p => p.Flights)).Distinct()
             .OrderBy(e => e.DepartureDate).ToImmutableList();
 
-        var flightsDictionary = distinctFlights.ToDictionary(k => k, _ => new List<StarAlliancePax>());
+        var flightsDictionary = distinctFlights.ToDictionary(k => k, _ => new List<LufthansaGroupPax>());
 
         foreach (var (_, passengers) in sortedBookings)
         {
@@ -29,7 +29,7 @@ public static class LufthansaGroupPaxConverter
             {
                 foreach (var flight in adult.Flights)
                 {
-                    var starAlliancePaxList = flightsDictionary[flight];
+                    var LufthansaGroupPaxList = flightsDictionary[flight];
 
                     Person? infant = null;
                     var baby = babies.FirstOrDefault(e => e.Flights.Contains(flight));
@@ -46,7 +46,7 @@ public static class LufthansaGroupPaxConverter
                         babies.Remove(baby);
                     }
                     
-                    starAlliancePaxList.Add(new StarAlliancePax(
+                    LufthansaGroupPaxList.Add(new LufthansaGroupPax(
                         adult.FrequentFlyerProgram,
                         adult.FrequentFlyerNumber,
                         new Person(
@@ -60,7 +60,7 @@ public static class LufthansaGroupPaxConverter
             }
         }
 
-        var flights = flightsDictionary.Select(LufthansaGroupPaxExporter.ExportStarAlliancePaxExportRows).ToImmutableList();
+        var flights = flightsDictionary.Select(LufthansaGroupPaxExporter.ExportLufthansaGroupPaxExportRows).ToImmutableList();
 
         return flights;
     }

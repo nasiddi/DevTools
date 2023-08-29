@@ -79,7 +79,7 @@ public class ListConversionController : ControllerBase
 
         if (listTypes.Contains(ListType.FlightList))
         {
-            files.AddRange(LufthansaGroupPaxConverter.ConvertToStarAlliancePax(rows));
+            files.AddRange(LufthansaGroupPaxConverter.ConvertToLufthansaGroupPax(rows));
         }
 
         return files;
