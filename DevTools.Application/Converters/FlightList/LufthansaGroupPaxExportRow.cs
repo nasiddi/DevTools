@@ -1,7 +1,4 @@
 using System;
-using CsvHelper;
-using CsvHelper.Configuration;
-using CsvHelper.TypeConversion;
 
 namespace DevTools.Application.Converters.FlightList;
 
@@ -69,24 +66,6 @@ public class LufthansaGroupPaxExportRow
     
     [LufthansaGroup("Date of expiry", 21)]
     public string? ExpirationDate { get; set; }
-}
-
-
-public class FlightListDateTimeConverter : DefaultTypeConverter
-{
-    public override string? ConvertToString(object? value, IWriterRow row, MemberMapData memberMapData)
-    {
-        if (value is null)
-        {
-            return null;
-        }
-
-        var date = value as DateTime?;
-
-        var result = date!.Value.ToString("dd-MMM-yyyy");
-
-        return result;
-    }
 }
 
 [AttributeUsage(AttributeTargets.Property)]

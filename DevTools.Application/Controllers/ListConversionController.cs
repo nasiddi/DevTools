@@ -10,6 +10,7 @@ using DevTools.Application.Converters.HolidayVillage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ratio_list_converter.Parser;
+using ratio_list_converter.Parser.RoomList;
 
 namespace ratio_list_converter.Controllers;
 
@@ -76,6 +77,11 @@ public class ListConversionController : ControllerBase
         {
             files.Add(HolidayVillageConverter.ConvertToHolidayVillage(rows));
         }
+        
+        if (listTypes.Contains(ListType.RoomList))
+        {
+            files.Add(RoomListConverter.ConvertToRoomList(rows));
+        }
 
         if (listTypes.Contains(ListType.FlightList))
         {
@@ -131,5 +137,6 @@ public class ListConversionController : ControllerBase
 public enum ListType
 {
     FerienDorfMasterList,
-    FlightList
+    FlightList,
+    RoomList
 }

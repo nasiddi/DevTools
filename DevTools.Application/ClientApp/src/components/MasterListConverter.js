@@ -17,6 +17,10 @@ export const MasterListConverter = () => {
 				name: 'Flight List',
 				isSelected: false,
 			},
+			{
+				name: 'Room List',
+				isSelected: false,
+			},
 		],
 		alert: {
 			level: 'success',

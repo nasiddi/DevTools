@@ -55,7 +55,7 @@ public class MasterListRow
     public string Travel_document_number { get; set; }
     public string Passenger_nationality { get; set; }
     public string Code_of_nationality { get; set; }
-    public string Date_of_expiry { get; set; }
+    public DateTime? Date_of_expiry { get; set; }
     public string Teilnehmeranrede { get; set; }
     public string Teilnehmername { get; set; }
     public DateTime? Tl_geburtstag { get; set; }
@@ -86,8 +86,8 @@ public class MasterListRowClassMap : ClassMap<MasterListRow>
         Map(m => m.BookingDate).Name("Bu.datum");
         Map(m => m.BookingNumber).Name("Bu.nr.");
         Map(m => m.InvoiceNumber).Name("Re.nr.");
-        Map(m => m.TripStartDate).Name("Reisedatum von").TypeConverter<CustomDateTimeConverter>();
-        Map(m => m.TripEndDate).Name("Reisedatum bis").TypeConverter<CustomDateTimeConverter>();
+        Map(m => m.TripStartDate).Name("Reisedatum von").TypeConverter<SwissDateTimeConverter>();
+        Map(m => m.TripEndDate).Name("Reisedatum bis").TypeConverter<SwissDateTimeConverter>();
         Map(m => m.NumberOfParticipants).Name("Gebuchte teilnehmer");
         Map(m => m.FormOfAddress).Name("Anrede");
         Map(m => m.EmptyTitle).Name("Titel").NameIndex(0);
@@ -116,7 +116,8 @@ public class MasterListRowClassMap : ClassMap<MasterListRow>
         Map(m => m.Paytype).Name("Paytype");
         Map(m => m.Date_of_birth).Name("Date_of_birth");
         Map(m => m.Gender).Name("Gender");
-        Map(m => m.Airline_assosiated_with_frequent_flyer_programm).Name("Airline_assosiated_with_frequent_flyer_programm");
+        Map(m => m.Airline_assosiated_with_frequent_flyer_programm)
+            .Name("Airline_assosiated_with_frequent_flyer_programm");
         Map(m => m.Frequent_flyer_number).Name("Frequent_flyer_number");
         Map(m => m.Infant_last_name).Name("Infant_last_name");
         Map(m => m.Infant_first_name).Name("Infant_first_name");
@@ -128,10 +129,10 @@ public class MasterListRowClassMap : ClassMap<MasterListRow>
         Map(m => m.Travel_document_number).Name("Travel_document_number");
         Map(m => m.Passenger_nationality).Name("Passenger_nationality");
         Map(m => m.Code_of_nationality).Name("Code_of_nationality");
-        Map(m => m.Date_of_expiry).Name("Date_of_expiry");
+        Map(m => m.Date_of_expiry).Name("Date_of_expiry").TypeConverter<WeirdDateTimeConverter>();
         Map(m => m.Teilnehmeranrede).Name("Teilnehmer anrede");
         Map(m => m.Teilnehmername).Name("Teilnehmer name");
-        Map(m => m.Tl_geburtstag).Name("Tl-geburtstag").TypeConverter<CustomDateTimeConverter>();
+        Map(m => m.Tl_geburtstag).Name("Tl-geburtstag").TypeConverter<SwissDateTimeConverter>();
         Map(m => m.Infounterbringung).Name("Info unterbringung");
         Map(m => m.Inforeise).Name("Info reise");
         Map(m => m.Ref1).Name("Ref1");
@@ -151,7 +152,7 @@ public class MasterListRowClassMap : ClassMap<MasterListRow>
     }
 }
 
-public class CustomDateTimeConverter : DefaultTypeConverter
+public class SwissDateTimeConverter : DefaultTypeConverter
 {
     public override object? ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
     {
@@ -159,9 +160,27 @@ public class CustomDateTimeConverter : DefaultTypeConverter
         {
             return null;
         }
+
         CultureInfo provider = CultureInfo.InvariantCulture;
-        
+
         var result = DateTime.ParseExact(text, "dd.MM.yyyy", CultureInfo.InvariantCulture);
+
+        return result;
+    }
+}
+
+public class WeirdDateTimeConverter : DefaultTypeConverter
+{
+    public override object? ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
+    {
+        if (text is null || text.Length == 0)
+        {
+            return null;
+        }
+
+        CultureInfo provider = CultureInfo.InvariantCulture;
+
+        var result = DateTime.ParseExact(text, "d-MMM-yyyy", CultureInfo.InvariantCulture);
 
         return result;
     }

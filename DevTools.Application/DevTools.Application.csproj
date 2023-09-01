@@ -40,6 +40,9 @@
         <None Update="Converters\FlightList\flightlist_lhg.xlsx">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Converters\RoomList\roomlist.xlsx">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
