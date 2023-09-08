@@ -17,7 +17,7 @@ public record LufthansaGroupPax(
 
 public record Person(
     string LastName,
-    string FirstNAme,
+    string FirstName,
     string MiddleName,
     Gender? Gender,
     DateTime? DateOfBirth);
@@ -34,17 +34,17 @@ public class LufthansaGroupPaxExporter
             return new LufthansaGroupPaxExportRow
             {
                 Index = index + 1,
-                LastName = e.Person.LastName,
-                FirstName = e.Person.FirstNAme,
-                MiddleName = e.Person.MiddleName,
+                LastName = CleanText(e.Person.LastName)!,
+                FirstName = CleanText(e.Person.FirstName)!,
+                MiddleName = CleanText(e.Person.MiddleName),
                 Title = MapTitle(e.Person.Gender),
                 PaxType = isChild ? "CHD" : null,
                 DateOfBirth = isChild ? e.Person.DateOfBirth?.ToString("dd-MMM-yyyy").ToUpper() : null,
                 Gender = null,
                 FrequentFlyerProgram = e.FrequentFlyerProgram,
                 FrequentFlyerNumber = e.FrequentFlyerNumber,
-                InfantLastName = e.Infant?.LastName,
-                InfantFirstName = e.Infant?.FirstNAme,
+                InfantLastName = CleanText(e.Infant?.LastName),
+                InfantFirstName = CleanText(e.Infant?.FirstName),
                 InfantDateOfBirth = e.Infant?.DateOfBirth?.ToString("dd-MMM-yyyy").ToUpper(),
                 AssociatedExtraSeat = null,
                 TravelDocumentType = null,
@@ -114,5 +114,20 @@ public class LufthansaGroupPaxExporter
             default:
                 throw new ArgumentOutOfRangeException(nameof(gender), gender, null);
         }
+    }
+
+    private static string? CleanText(string? text)
+    {
+        if (text is null)
+        {
+            return null;
+        }
+
+        var clean = text.Replace("-", " ").ToUpper();
+        clean = clean.Replace("Ä", "AE");
+        clean = clean.Replace("Ö", "OE");
+        clean = clean.Replace("Ü", "UE");
+
+        return clean;
     }
 }

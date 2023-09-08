@@ -38,7 +38,7 @@ public static class LufthansaGroupPaxConverter
                     {
                         infant = new Person(
                             LastName: baby.FamilyName,
-                            FirstNAme: baby.FirstName,
+                            FirstName: baby.FirstName,
                             MiddleName: baby.MiddleName,
                             DateOfBirth: baby.DateOfBirth,
                             Gender: baby.Gender);
@@ -51,7 +51,7 @@ public static class LufthansaGroupPaxConverter
                         adult.FrequentFlyerNumber,
                         new Person(
                             LastName: adult.FamilyName,
-                            FirstNAme: adult.FirstName,
+                            FirstName: adult.FirstName,
                             MiddleName: adult.MiddleName,
                             DateOfBirth: adult.DateOfBirth,
                             Gender: adult.Gender),

@@ -34,6 +34,7 @@ public class MasterListParser
             var passportNumber = p.DistinctBy(e => e.Travel_document_number).FirstOrDefault()?.Travel_document_number;
             var expirationDate = p.DistinctBy(e => e.Date_of_expiry).FirstOrDefault()?.Date_of_expiry;
             var countryCode = p.DistinctBy(e => e.Country_code).FirstOrDefault()?.Country_code;
+            var hotelInfo = p.FirstOrDefault(e => e.Infounterbringung.Length > 0)?.Infounterbringung;
 
             var age = tripStartDate?.Year - dateOfBirth?.Year;
             if (age.HasValue && dateOfBirth!.Value.Date > tripStartDate!.Value.AddYears(-age.Value)) age--;            
@@ -59,7 +60,7 @@ public class MasterListParser
                 PassportNumber: passportNumber,
                 Nationality: nationality,
                 ExpirationDate: expirationDate,
-                Comments: !guestsByRoomKey.Key.HasValue ? "No RoomReference found." : null,
+                Comments: hotelInfo ?? (!guestsByRoomKey.Key.HasValue ? "No RoomReference found." : null),
                 TripStartDate: tripStartDate,
                 TripEndDate: tripEndDate,
                 Age: age
