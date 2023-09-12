@@ -12,13 +12,14 @@ public class MasterListExportRow
     public Gender? Sex { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string? DocumentNumber { get; set; }
-    public Transport? Transport { get; set; }
     public string? BikeTransport { get; set; }
+    public Transport? TripStartTransport { get; set; }
     public DateTime? TripStartDate { get; set; }
     public PickupDropOffLocation? PickupLocation { get; set; }
+    public Transport? TripEndTransport { get; set; }
     public DateTime? TripEndDate { get; set; }
-    public string? TravelInfo { get; set; }
     public PickupDropOffLocation? DropOffLocation { get; set; }
+    public string? TravelInfo { get; set; }
     public RoomType? RoomType { get; set; }
     public int RoomReference { get; set; }
     public string Meals { get; set; }

@@ -7,10 +7,6 @@ namespace DevTools.Application.Converters.HolidayVillage;
 
 public class MasterListExporter
 {
-    public static ImmutableList<LufthansaGroupPaxExportRow> ExportLufthansaGroupPaxExportRows()
-    {
-        return ImmutableList<LufthansaGroupPaxExportRow>.Empty;
-    }
     public static ImmutableList<MasterListExportRow> ExportHolidayVillage(IReadOnlyList<Booking> bookings)
     {
         var sortedBookings = bookings.OrderBy(e =>
@@ -40,10 +36,11 @@ public class MasterListExporter
                         Sex = p.Gender,
                         DateOfBirth = p.DateOfBirth,
                         DocumentNumber = p.IdentificationDocumentNumber,
-                        Transport = p.ParticipantTravelInformation?.Transport,
+                        TripStartTransport = p.ParticipantTravelInformation?.Transport,
                         BikeTransport = p.ParticipantTravelInformation?.BikeTransport,
                         TripStartDate = p.ParticipantTravelInformation?.TripStartDate,
                         PickupLocation = p.ParticipantTravelInformation?.PickUpLocation,
+                        TripEndTransport = p.ParticipantTravelInformation?.Transport,
                         TripEndDate = p.ParticipantTravelInformation?.TripEndDate,
                         DropOffLocation = p.ParticipantTravelInformation?.DropOffLocation,
                         TravelInfo = p.TravelInfo,
