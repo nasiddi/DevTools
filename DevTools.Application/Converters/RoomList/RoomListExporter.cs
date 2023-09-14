@@ -37,13 +37,14 @@ public class RoomListExporter
 
         var rowIndex = 5;
 
-        var tripStartDate = groupedRooms.SelectMany(e => e.SelectMany(r => r.Guests.Select(g => g.TripStartDate))).Min();
+        var tripStartDate = groupedRooms.SelectMany(e => e.SelectMany(r => r.Guests.Select(g => g.TripStartDate)))
+            .Min();
         var tripEndDate = groupedRooms.SelectMany(e => e.SelectMany(r => r.Guests.Select(g => g.TripEndDate))).Max();
-        
+
         sheet.Cells[4, 13].Value = tripStartDate;
         sheet.Cells[5, 13].Value = tripEndDate;
         sheet.Cells[4, 13, 5, 13].Style.Numberformat.Format = "dd.mm.yyyy";
-        
+
         foreach (var groupedRoom in groupedRooms)
         {
             sheet.Cells[rowIndex, 5].Value = GetRoomName(groupedRoom.Key);
@@ -65,7 +66,13 @@ public class RoomListExporter
         foreach (var roomGroup in groupedRooms)
         {
             rowIndex += 2;
-            SetTableHeader(sheet, columns, rowIndex, GetRoomName(roomGroup.Key), roomGroup.Count());
+            SetTableHeader(
+                sheet: sheet,
+                columns: columns,
+                rowIndex: rowIndex,
+                name: GetRoomName(roomGroup.Key),
+                roomCount: roomGroup.Count(),
+                guestCount: roomGroup.Sum(e => e.NumberOfGuests));
             rowIndex += 2;
             var index = 1;
 
@@ -101,7 +108,7 @@ public class RoomListExporter
                             sheet.Cells[rowIndex, columnIndex].Style.Numberformat.Format = "dd.mm.yy";
                         }
                     }
-                    
+
                     rowIndex++;
                 }
 
@@ -125,7 +132,8 @@ public class RoomListExporter
         ImmutableList<(PropertyInfo ColumnData, RoomListAttribute ColumnMeta)> columns,
         int rowIndex,
         string name,
-        int count)
+        int roomCount,
+        int guestCount)
     {
         sheet.Cells[rowIndex, 1, rowIndex + 1, LastColumnIndex].Style.Fill.BackgroundColor
             .SetColor(ColorTranslator.FromHtml("#D9D9D9"));
@@ -135,13 +143,21 @@ public class RoomListExporter
             ExcelBorderStyle.Medium;
         sheet.Cells[rowIndex + 1, 1, rowIndex + 1, LastColumnIndex].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
 
-        sheet.Cells[rowIndex, 2, rowIndex, 3].Style.Font.Bold = true;
+        sheet.Cells[rowIndex, 2, rowIndex, 5].Style.Font.Bold = true;
+
         sheet.Cells[rowIndex, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
         sheet.Cells[rowIndex, 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
         sheet.Cells[rowIndex, 3].Style.Font.Color.SetColor(ColorTranslator.FromHtml("#FF0000"));
 
         sheet.Cells[rowIndex, 2].Value = $"{name}:";
-        sheet.Cells[rowIndex, 3].Value = count;
+        sheet.Cells[rowIndex, 3].Value = roomCount;
+
+        sheet.Cells[rowIndex, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+        sheet.Cells[rowIndex, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+        sheet.Cells[rowIndex, 5].Style.Font.Color.SetColor(ColorTranslator.FromHtml("#FF0000"));
+
+        sheet.Cells[rowIndex, 4].Value = "guests:";
+        sheet.Cells[rowIndex, 5].Value = guestCount;
 
         foreach (var (_, columnMeta) in columns)
         {

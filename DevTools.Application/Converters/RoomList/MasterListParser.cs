@@ -12,8 +12,8 @@ public class MasterListParser
         var bookings = records
             .Where(e => e.BookingCode == "Festbuchung" && e.Leistungsart == "U-Zimmer")
             .GroupBy(e => e.Teilnehmernr)
-            .GroupBy(e => e.FirstOrDefault(p => p.Belegungsnr.HasValue)?.Belegungsnr)
-            .Select(e => MapRoom(e))
+            .GroupBy(e => e.MinBy(p => p.Belegungsnr)?.Belegungsnr)
+            .Select(MapRoom)
             .ToList();
 
         return bookings.ToImmutableList();
