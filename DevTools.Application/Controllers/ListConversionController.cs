@@ -64,7 +64,7 @@ public class ListConversionController : ControllerBase
         }
 
         memoryStream.Seek(0, SeekOrigin.Begin);
-        return File(memoryStream.ToArray(), GetContentType(MimeType.Zip), "convertedLists.zip");
+        return File(memoryStream.ToArray(), GetContentType(MimeType.Zip), $"{DateTime.Now:yyMMdd-hhmm}_{file[0].FileName.Split(".")[0]}.zip");
     }
 
     private static List<ConvertedFile> ConvertFiles(IFormFileCollection file, ImmutableList<ListType> listTypes)
