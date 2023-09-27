@@ -35,16 +35,25 @@ public class RoomListExporter
         using var excelPackage = new ExcelPackage(fileInfo);
         var sheet = excelPackage.Workbook.Worksheets[1];
 
-        var rowIndex = 5;
 
         var tripStartDate = groupedRooms.SelectMany(e => e.SelectMany(r => r.Guests.Select(g => g.TripStartDate)))
             .Min();
         var tripEndDate = groupedRooms.SelectMany(e => e.SelectMany(r => r.Guests.Select(g => g.TripEndDate))).Max();
 
+        sheet.Cells[4, 9].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+        sheet.Cells[4, 10].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+        sheet.Cells[4, 10].Style.Font.Color.SetColor(ColorTranslator.FromHtml("#FF0000"));
+        sheet.Cells[4, 9, 4, 10].Style.Font.Bold = true;
+
+        sheet.Cells[4, 9].Value = "total guests:";
+        sheet.Cells[4, 10].Value = groupedRooms.Sum(e => e.Sum(d => d.NumberOfGuests));
+        
         sheet.Cells[4, 13].Value = tripStartDate;
         sheet.Cells[5, 13].Value = tripEndDate;
         sheet.Cells[4, 13, 5, 13].Style.Numberformat.Format = "dd.mm.yyyy";
 
+        var rowIndex = 5;
+        
         foreach (var groupedRoom in groupedRooms)
         {
             sheet.Cells[rowIndex, 5].Value = GetRoomName(groupedRoom.Key);
