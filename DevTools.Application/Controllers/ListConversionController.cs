@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using DevTools.Application.Converters.FaM;
 using DevTools.Application.Converters.FlightList;
 using DevTools.Application.Converters.HolidayVillage;
 using Microsoft.AspNetCore.Http;
@@ -78,6 +79,11 @@ public class ListConversionController : ControllerBase
             files.Add(HolidayVillageConverter.ConvertToHolidayVillage(rows));
         }
         
+        if (listTypes.Contains(ListType.FerienAmMeerMasterList))
+        {
+            files.Add(FaMConverter.ConvertToFaM(rows));
+        }
+        
         if (listTypes.Contains(ListType.RoomList))
         {
             files.Add(RoomListConverter.ConvertToRoomList(rows));
@@ -137,6 +143,7 @@ public class ListConversionController : ControllerBase
 public enum ListType
 {
     FerienDorfMasterList,
+    FerienAmMeerMasterList,
     FlightList,
     RoomList
 }

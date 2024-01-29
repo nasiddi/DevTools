@@ -1,21 +1,9 @@
 import React, { useState } from 'react'
-import { Button, Grid, TextField } from '@material-ui/core'
+import { Button, Grid, TextField } from '@mui/material'
 import CryptoJS from 'crypto-js/'
-import { makeStyles } from '@material-ui/core/styles'
 import { userIsLoggedIn } from '../auth/AuthUtlis'
 
-const useStyles = makeStyles((theme) => ({
-	normalizeHeight: {
-		height: 56,
-	},
-	cardContent: {
-		background: theme.palette.background.level1,
-	},
-}))
-
 const Login = () => {
-	const classes = useStyles()
-
 	const initialState = {
 		username: '',
 		hashedPassword: '',
@@ -37,9 +25,7 @@ const Login = () => {
 	}
 
 	function onPasswordChange(event) {
-		const password = CryptoJS.enc.Base64.stringify(
-			CryptoJS.enc.Utf8.parse(event.target.value)
-		)
+		const password = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(event.target.value))
 		setState({ ...state, hashedPassword: password })
 	}
 
@@ -74,7 +60,6 @@ const Login = () => {
 						fullWidth={true}
 						size={'large'}
 						disableElevation
-						className={classes.normalizeHeight}
 					>
 						Login
 					</Button>

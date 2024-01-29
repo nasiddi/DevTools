@@ -1,10 +1,8 @@
 import React, { useState } from 'react'
 import { postForm } from '../BackendClient'
-import Button from '@material-ui/core/Button'
-import { Grid, LinearProgress } from '@material-ui/core'
-import { Alert, AlertTitle } from '@material-ui/lab'
-import OpenInNewIcon from '@material-ui/icons/OpenInNew'
-import FileCopyIcon from '@material-ui/icons/FileCopy'
+import { Button, Alert, AlertTitle, Grid, LinearProgress } from '@mui/material'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import FileCopyIcon from '@mui/icons-material/FileCopy'
 
 export const FileUpload = () => {
 	const [state, setState] = useState({
@@ -20,11 +18,7 @@ export const FileUpload = () => {
 	}
 
 	const openInNewTab = (e) => {
-		window.open(
-			`/file-download/${e.currentTarget.id}`,
-			'_blank',
-			'noopener,noreferrer'
-		)
+		window.open(`/file-download/${e.currentTarget.id}`, '_blank', 'noopener,noreferrer')
 	}
 
 	const importFile = async () => {

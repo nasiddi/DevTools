@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {
-	Box,
-	Chip,
-	ClickAwayListener,
-	Grid,
-	Menu,
-	MenuItem,
-} from '@mui/material'
+import { Box, Chip, ClickAwayListener, Grid, Menu, MenuItem } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 
 const updateOptions = (options, key, state, setState) => {
@@ -32,9 +25,7 @@ export function onDeselect(event, optionKey, state, setState) {
 }
 
 export function onSelect(event, optionKey, allOptions, state, setState) {
-	const location = allOptions.find(
-		(l) => l.value.toString() === event.target.id
-	)
+	const location = allOptions.find((l) => l.value.toString() === event.target.id)
 	const options = state[optionKey]
 	options.push(location)
 	updateOptions(options, optionKey, state, setState)
@@ -75,11 +66,7 @@ export default function MultiSelect(props) {
 		) : (
 			props.selectedOptions.map((l) => (
 				<Grid item key={l.value}>
-					<Chip
-						label={l.label}
-						id={l.value}
-						onDelete={props.onRemoveOption}
-					/>
+					<Chip label={l.label} id={l.value} onDelete={props.onRemoveOption} />
 				</Grid>
 			))
 		)
@@ -111,10 +98,7 @@ export default function MultiSelect(props) {
 							alignItems="center"
 							spacing={1}
 							style={{
-								marginTop:
-									props.selectedOptions.length === 0
-										? '-5px'
-										: '-9px',
+								marginTop: props.selectedOptions.length === 0 ? '-5px' : '-9px',
 							}}
 						>
 							<Grid item xs={11}>

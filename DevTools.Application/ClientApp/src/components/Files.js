@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { get, post } from '../BackendClient'
-import Button from '@material-ui/core/Button'
 import {
+	Button,
 	Table,
 	TableBody,
 	TableCell,
 	TableContainer,
 	TableHead,
 	TableRow,
-} from '@material-ui/core'
+} from '@mui/material'
 import { humanFileSize } from '../Utlis/Common'
-import DeleteIcon from '@material-ui/icons/Delete'
-import GetAppIcon from '@material-ui/icons/GetApp'
+import DeleteIcon from '@mui/icons-material/Delete'
+import GetAppIcon from '@mui/icons-material/GetApp'
 
 export const Files = () => {
 	const [state, setState] = useState({
@@ -57,9 +57,7 @@ export const Files = () => {
 							<TableCell component="th" scope="row">
 								{f.filename}
 							</TableCell>
-							<TableCell align="right">
-								{humanFileSize(f.size)}
-							</TableCell>
+							<TableCell align="right">{humanFileSize(f.size)}</TableCell>
 							<TableCell align="center">
 								<Button>
 									<a href={`/file/${f.guid}`}>
@@ -69,11 +67,7 @@ export const Files = () => {
 							</TableCell>
 							<TableCell align="center">
 								<Button>
-									<DeleteIcon
-										color={'error'}
-										id={f.guid}
-										onClick={removeFile}
-									/>
+									<DeleteIcon color={'error'} id={f.guid} onClick={removeFile} />
 								</Button>
 							</TableCell>
 						</TableRow>

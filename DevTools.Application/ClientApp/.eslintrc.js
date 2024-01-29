@@ -1,10 +1,14 @@
 module.exports = {
-	parser: 'babel-eslint',
-	extends: [
-		'plugin:flowtype/recommended',
-		'plugin:react/recommended',
-		'prettier',
-	],
+	parser: '@babel/eslint-parser',
+	parserOptions: {
+		sourceType: 'module',
+		requireConfigFile: false,
+		allowImportExportEverywhere: false,
+		ecmaFeatures: {
+			globalReturn: false,
+		},
+	},
+	extends: ['plugin:flowtype/recommended', 'plugin:react/recommended', 'prettier'],
 	plugins: ['react', 'flowtype', 'import', 'prettier'],
 	env: {
 		es6: true,
@@ -12,24 +16,17 @@ module.exports = {
 		node: true,
 		'shared-node-browser': true,
 	},
-	parserOptions: {
-		ecmaVersion: 2017,
-		sourceType: 'module',
-		jsx: true,
-		ecmaFeatures: {
-			experimentalObjectRestSpread: true,
-		},
-	},
 	rules: {
 		//'compat/compat': 1,
 		'prettier/prettier': [
 			'error',
 			{
 				useTabs: true,
-				printWidth: 80,
+				printWidth: 100,
 				tabWidth: 4,
 				singleQuote: true,
 				trailingComma: 'es5',
+				jsxBracketSameLine: false,
 				semi: false,
 			},
 		],
@@ -48,10 +45,7 @@ module.exports = {
 		// Prefer new line before return
 		// http://eslint.org/docs/rules/newline-before-return
 		'newline-before-return': 'error',
-		'no-use-before-define': [
-			'error',
-			{ functions: false, classes: false, variables: true },
-		],
+		'no-use-before-define': ['error', { functions: false, classes: false, variables: true }],
 		'import/no-extraneous-dependencies': 0,
 		'import/extensions': 0,
 		'import/no-unresolved': 0,

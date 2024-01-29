@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { get } from '../BackendClient'
-import { Button, Grid } from '@material-ui/core'
+import { Button, Grid } from '@mui/material'
 import { humanFileSize } from '../Utlis/Common'
 
 export const FileDownload = () => {
@@ -25,13 +25,7 @@ export const FileDownload = () => {
 	}, [])
 
 	return (
-		<Grid
-			container
-			spacing={2}
-			direction="column"
-			justifyContent="center"
-			alignItems="center"
-		>
+		<Grid container spacing={2} direction="column" justifyContent="center" alignItems="center">
 			<Grid item xs={12}>
 				<span>{state.metaInfo.filename}</span>
 			</Grid>

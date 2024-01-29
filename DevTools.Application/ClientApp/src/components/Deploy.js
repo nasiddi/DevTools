@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Alert, Button, Col, Container, Row, Spinner } from 'reactstrap'
-import { Checkbox, FormControlLabel } from '@material-ui/core'
+import { Checkbox, FormControlLabel } from '@mui/material'
 import { get, post } from '../BackendClient'
 
 export function Deploy() {
@@ -168,12 +168,7 @@ export function Deploy() {
 						<Col />
 					</Row>
 				</Container>
-				<Button
-					onClick={deploy}
-					color={'primary'}
-					block
-					disabled={state.deployOnChange}
-				>
+				<Button onClick={deploy} color={'primary'} block disabled={state.deployOnChange}>
 					Deploy
 				</Button>
 			</div>
@@ -205,8 +200,7 @@ export function Deploy() {
 		renderContent()
 	)
 
-	const alert =
-		state.alert.text.length === 0 ? <div /> : renderAlert(state.alert)
+	const alert = state.alert.text.length === 0 ? <div /> : renderAlert(state.alert)
 
 	return (
 		<div className={'deploy'}>

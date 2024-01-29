@@ -9,11 +9,13 @@ public class MasterListParser
 {
     public static ImmutableList<Room> Parse(IImmutableList<MasterListRow> records)
     {
-        var bookings = records
+        var groupings = records
             .Where(e => e.BookingCode == "Festbuchung" && e.Leistungsart == "U-Zimmer")
             .GroupBy(e => e.Teilnehmernr)
             .GroupBy(e => e.MinBy(p => p.Belegungsnr)?.Belegungsnr)
-            .Select(MapRoom)
+            .ToList();
+        
+        var bookings = groupings.Select(MapRoom)
             .ToList();
 
         return bookings.ToImmutableList();
@@ -37,7 +39,7 @@ public class MasterListParser
             var hotelInfo = p.FirstOrDefault(e => e.Infounterbringung.Length > 0)?.Infounterbringung;
 
             var age = tripStartDate?.Year - dateOfBirth?.Year;
-            if (age.HasValue && dateOfBirth!.Value.Date > tripStartDate!.Value.AddYears(-age.Value)) age--;            
+            if (age.HasValue && dateOfBirth!.Value.Date > tripStartDate!.Value.AddYears(-age.Value)) age--;
             string? nationality = null;
 
             if (countryCode is not null)

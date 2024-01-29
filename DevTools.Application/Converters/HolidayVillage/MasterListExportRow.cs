@@ -20,11 +20,13 @@ public class MasterListExportRow
     public DateTime? TripEndDate { get; set; }
     public PickupDropOffLocation? DropOffLocation { get; set; }
     public string? TravelInfo { get; set; }
-    public RoomType? RoomType { get; set; }
+    public string? RoomType { get; set; }
     public int RoomReference { get; set; }
     public string Meals { get; set; }
     public string? HotelInfo { get; set; }
     public string? PhoneNumber { get; set; }
+    
+    public string? Email { get; set; }
     public CommunicationType? CommunicationType { get; set; }
     public string? Excursion1 { get; set; }
     public DateTime? Excursion1Date { get; set; }

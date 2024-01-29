@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Button from '@material-ui/core/Button'
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TableRow,
-} from '@material-ui/core'
-import DeleteIcon from '@material-ui/icons/Delete'
+import DeleteIcon from '@mui/icons-material/Delete'
 import { get } from '../../BackendClient'
 
 export const Characters = () => {

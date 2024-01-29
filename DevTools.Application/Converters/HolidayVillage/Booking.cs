@@ -48,8 +48,6 @@ public record ParticipantTravelInformation(
         DateTime TripEndDate,
         PickupDropOffLocation? PickUpLocation,
         PickupDropOffLocation? DropOffLocation,
-        string? TravelRemarks,
-        string? HotelRemarks,
         string? BikeTransport,
         IReadOnlyList<PreBookedExcursion> Excursions);
 

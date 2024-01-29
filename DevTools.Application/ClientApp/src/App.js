@@ -25,18 +25,10 @@ export default function App() {
 						<Route exact path="/deploy-spa" element={<Deploy />} />
 					</Route>
 					<Route exact path="/hue-colors" element={<AuthRoute />}>
-						<Route
-							exact
-							path="/hue-colors"
-							element={<HueColors />}
-						/>
+						<Route exact path="/hue-colors" element={<HueColors />} />
 					</Route>
 					<Route exact path="/file-upload" element={<AuthRoute />}>
-						<Route
-							exact
-							path="/file-upload"
-							element={<FileUpload />}
-						/>
+						<Route exact path="/file-upload" element={<FileUpload />} />
 					</Route>
 					<Route exact path="/files" element={<AuthRoute />}>
 						<Route exact path="/files" element={<Files />} />
@@ -44,22 +36,10 @@ export default function App() {
 					<Route exact path="/citadels/game" element={<AuthRoute />}>
 						<Route exact path="/citadels/game" element={<Game />} />
 					</Route>
-					<Route
-						exact
-						path="/citadels/statistics"
-						element={<AuthRoute />}
-					>
-						<Route
-							exact
-							path="/citadels/statistics"
-							element={<Statistics />}
-						/>
+					<Route exact path="/citadels/statistics" element={<AuthRoute />}>
+						<Route exact path="/citadels/statistics" element={<Statistics />} />
 					</Route>
-					<Route
-						exact
-						path="/citadels/character-configuration"
-						element={<AuthRoute />}
-					>
+					<Route exact path="/citadels/character-configuration" element={<AuthRoute />}>
 						<Route
 							exact
 							path="/citadels/character-configuration"
@@ -70,16 +50,8 @@ export default function App() {
 			</DefaultLayout>
 			<CleanLayout>
 				<Routes>
-					<Route
-						exact
-						path="/file-download/:id"
-						element={<FileDownload />}
-					/>
-					<Route
-						exact
-						path="/list-converter"
-						element={<MasterListConverter />}
-					/>
+					<Route exact path="/file-download/:id" element={<FileDownload />} />
+					<Route exact path="/list-converter" element={<MasterListConverter />} />
 				</Routes>
 			</CleanLayout>
 		</>

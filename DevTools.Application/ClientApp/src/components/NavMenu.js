@@ -40,10 +40,7 @@ export class NavMenu extends Component {
 						<NavbarBrand tag={Link} to="/">
 							DevTools
 						</NavbarBrand>
-						<NavbarToggler
-							onClick={this.toggleNavbar}
-							className="mr-2"
-						/>
+						<NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
 						<Collapse
 							className="d-sm-inline-flex flex-sm-row-reverse"
 							isOpen={!this.state.collapsed}
@@ -51,38 +48,22 @@ export class NavMenu extends Component {
 						>
 							<ul className="navbar-nav flex-grow">
 								<NavItem>
-									<NavLink
-										tag={Link}
-										className="text-dark"
-										to="/"
-									>
+									<NavLink tag={Link} className="text-dark" to="/">
 										Home
 									</NavLink>
 								</NavItem>
 								<NavItem>
-									<NavLink
-										tag={Link}
-										className="text-dark"
-										to="/deploy-spa"
-									>
+									<NavLink tag={Link} className="text-dark" to="/deploy-spa">
 										Deploy SPA
 									</NavLink>
 								</NavItem>
 								<NavItem>
-									<NavLink
-										tag={Link}
-										className="text-dark"
-										to="/hue-colors"
-									>
+									<NavLink tag={Link} className="text-dark" to="/hue-colors">
 										Hue Colors
 									</NavLink>
 								</NavItem>
 								<NavItem>
-									<NavLink
-										tag={Link}
-										className="text-dark"
-										to="/file-upload"
-									>
+									<NavLink tag={Link} className="text-dark" to="/file-upload">
 										File Upload
 									</NavLink>
 								</NavItem>

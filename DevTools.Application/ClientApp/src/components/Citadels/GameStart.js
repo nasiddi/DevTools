@@ -1,9 +1,9 @@
 /* eslint-disable react/jsx-key */
 import React, { useEffect, useState } from 'react'
-import Button from '@material-ui/core/Button'
-import { Chip, Grid, TextField } from '@material-ui/core'
+import Button from '@mui/material/Button'
+import { Chip, Grid, TextField } from '@mui/material'
+import Autocomplete from '@mui/material/Autocomplete'
 import { get, post } from '../../BackendClient'
-import { Autocomplete } from '@material-ui/lab'
 
 export const GameStart = () => {
 	const [state, setState] = useState({
@@ -49,10 +49,7 @@ export const GameStart = () => {
 
 			setState({
 				...state,
-				selectedPlayers: [
-					...state.selectedPlayers,
-					{ id: 0, name: value, isActive: true },
-				],
+				selectedPlayers: [...state.selectedPlayers, { id: 0, name: value, isActive: true }],
 			})
 
 			return
@@ -69,9 +66,7 @@ export const GameStart = () => {
 				...state,
 				selectedPlayers: [
 					...state.selectedPlayers,
-					state.players.find(
-						(p) => p.name === event.currentTarget.childNodes[0].data
-					),
+					state.players.find((p) => p.name === event.currentTarget.childNodes[0].data),
 				],
 				players: [...state.players],
 			})
@@ -89,9 +84,7 @@ export const GameStart = () => {
 		if (state.selectedPlayers.some((p) => p.name === id)) {
 			setState({
 				...state,
-				selectedPlayers: state.selectedPlayers.filter(
-					(p) => p.name !== id
-				),
+				selectedPlayers: state.selectedPlayers.filter((p) => p.name !== id),
 				players: [...state.players],
 			})
 		}
@@ -115,21 +108,14 @@ export const GameStart = () => {
 			spacing={3}
 		>
 			<Grid item xs={12}>
-				<Button
-					fullWidth
-					color="primary"
-					variant="contained"
-					onClick={startGame}
-				>
+				<Button fullWidth color="primary" variant="contained" onClick={startGame}>
 					Start Game
 				</Button>
 			</Grid>
 			<Grid item xs={12}>
 				<Autocomplete
 					multiple
-					options={state.players
-						.filter((p) => !p.isActive)
-						.map((option) => option.name)}
+					options={state.players.filter((p) => !p.isActive).map((option) => option.name)}
 					freeSolo
 					onChange={onPlayersChange}
 					value={state.selectedPlayers}

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Button } from 'reactstrap'
 import { HexColorPicker } from 'react-colorful'
-import { Checkbox, FormControlLabel } from '@material-ui/core'
+import { Checkbox, FormControlLabel } from '@mui/material'
 import { get, post } from '../BackendClient'
 
 export class HueColors extends Component {
@@ -36,17 +36,9 @@ export class HueColors extends Component {
 			<div key={light.hueId}>
 				<h4>{light.name}</h4>
 				<section className={'responsive'}>
-					<HexColorPicker
-						color={light.color}
-						onChange={(c) => this.setColor(light, c)}
-					/>
+					<HexColorPicker color={light.color} onChange={(c) => this.setColor(light, c)} />
 				</section>
-				<Button
-					id={light.hueId}
-					onClick={this.resetToDefault}
-					color={'secondary'}
-					block
-				>
+				<Button id={light.hueId} onClick={this.resetToDefault} color={'secondary'} block>
 					Reset to default
 				</Button>
 				<Button

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace DevTools.Application.Converters.HolidayVillage;
+namespace DevTools.Application.Converters.FaM;
 
 public class MasterListExporter
 {
-    public static ImmutableList<MasterListExportRow> ExportHolidayVillage(IReadOnlyList<Booking> bookings)
+    public static ImmutableList<MasterListExportRow> ExportFaM(IReadOnlyList<Booking> bookings)
     {
         var sortedBookings = bookings.OrderBy(e =>
                 e.Rooms.Min(r => r.Participants.Min(p => p.ParticipantTravelInformation?.TripStartDate)))
@@ -23,9 +23,6 @@ public class MasterListExporter
             {
                 foreach (var p in room.Participants.OrderBy(e => e.FamilyName).ThenBy(e => e.FirstName))
                 {
-                    var excursions = p.ParticipantTravelInformation?.Excursions;
-                    var count = excursions?.Count ?? 0;
-                    
                     var row = new MasterListExportRow
                     {
                         Index = index,
@@ -35,34 +32,20 @@ public class MasterListExporter
                         RatioPersonNumber = p.ParticipantNumber,
                         Sex = p.Gender,
                         DateOfBirth = p.DateOfBirth,
+                        Group = booking.Group,
                         DocumentNumber = p.IdentificationDocumentNumber,
                         TripStartTransport = p.ParticipantTravelInformation?.Transport,
-                        BikeTransport = p.ParticipantTravelInformation?.BikeTransport,
                         TripStartDate = p.ParticipantTravelInformation?.TripStartDate,
-                        PickupLocation = p.ParticipantTravelInformation?.PickUpLocation,
+                        InboundAirport = p.ParticipantTravelInformation?.InboundAirport,
                         TripEndTransport = p.ParticipantTravelInformation?.Transport,
                         TripEndDate = p.ParticipantTravelInformation?.TripEndDate,
-                        DropOffLocation = p.ParticipantTravelInformation?.DropOffLocation,
+                        OutboundAirport = p.ParticipantTravelInformation?.OutboundAirport,
                         TravelInfo = p.TravelInfo,
                         HotelInfo = p.HotelInfo,
                         RoomType = MapRoomType(room.RoomType),
                         RoomReference = room.RoomReference,
-                        Meals = booking.IsFullBoard ? "Full Board" : "Half Board",
-                        PhoneNumber = booking.PhoneNumber,
-                        Email = booking.Email,
-                        CommunicationType = booking.CommunicationType,
-                        Excursion1 = count > 0 ? excursions![0].Name : null,
-                        Excursion1Date = count > 0 ? excursions![0].Date : null,
-                        Excursion2 = count > 1 ? excursions![1].Name : null,
-                        Excursion2Date = count > 1 ? excursions![1].Date : null,
-                        Excursion3 = count > 2 ? excursions![1].Name : null,
-                        Excursion3Date = count > 2 ? excursions![2].Date : null,
-                        Excursion4 = count > 3 ? excursions![1].Name : null,
-                        Excursion4Date = count > 3 ? excursions![3].Date : null,
-                        Excursion5 = count > 4 ? excursions![1].Name : null,
-                        Excursion5Date = count > 4 ? excursions![4].Date : null,
-                        Excursion6 = count > 5 ? excursions![1].Name : null,
-                        Excursion6Date = count > 5 ? excursions![5].Date : null
+                        MealPlan = booking.MealPlan,
+                        PhoneNumber = booking.PhoneNumber
                     };
                     
                     rows.Add(row);
@@ -73,18 +56,34 @@ public class MasterListExporter
 
         return rows.ToImmutableList();
     }
-    
+
     private static string? MapRoomType(RoomType? roomType)
     {
         return roomType switch
         {
-            RoomType.SUPAPMEER => "SUITE_SEA",
-            RoomType.SUPAP => "SUITE",
-            RoomType.OSKMEER => "JS_KITCHEN_SEA",
-            RoomType.OSMEER => "JS_SEA",
-            RoomType.OS => "JS",
+            RoomType.D44 or RoomType.DGV => "DZ Standard",
+            RoomType.DMP => "DZ Sharing Pool Meersicht",
+            RoomType.DSP => "DZ Sharing Pool",
+            RoomType.DSV or RoomType.M44 => "DZ Meersicht",
+            RoomType.E44 or RoomType.SGV => "EZ Standard",
+            RoomType.EM44 or RoomType.SSV => "EZ Meersicht",
+            RoomType.EPM44 => "EZ Poolfront Meersicht",
+            RoomType.FAP => "Familienappartment Sharing Pool",
+            RoomType.FAS => "Familienappartment Standard",
+            RoomType.FPM => "Suite Sharing Pool Meersicht",
+            RoomType.FSM => "Familienappartment Meersicht",
+            RoomType.FSR => "Suite",
+            RoomType.P44 => "DZ Poolfront",
+            RoomType.PM44 => "DZ Poolfront Meersicht",
+            RoomType.SSP => "EZ Sharing Pool",
+            RoomType.SSPSV => "EZ Sharing Pool Meersicht",
+            RoomType.TGV => "DZ mit Zustellbett Standard",
+            RoomType.TMP => "DZ mit Zustellbett Sharing Pool Meersicht",
+            RoomType.TSP => "DZ mit Zustellbett Sharing Pool",
+            RoomType.TSV => "DZ mit Zustellbett Meersicht",
             null => null,
-            _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
+            RoomType.BABYACC => throw new InvalidOperationException(),
+            _ => $"Unknown RoomType {roomType}"
         };
     }
 }

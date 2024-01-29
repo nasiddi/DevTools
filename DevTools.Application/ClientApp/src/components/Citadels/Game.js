@@ -12,10 +12,10 @@ import {
 	DialogTitle,
 	Grid,
 	TextField,
-} from '@material-ui/core'
-import ArrowForwardIcon from '@material-ui/icons/ArrowForward'
-import EmojiEventsIcon from '@material-ui/icons/EmojiEvents'
-import EmojiEventsOutlinedIcon from '@material-ui/icons/EmojiEventsOutlined'
+} from '@mui/material'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
+import EmojiEventsOutlinedIcon from '@mui/icons-material/EmojiEventsOutlined'
 
 export const Game = () => {
 	const [state, setState] = useState({
@@ -80,9 +80,7 @@ export const Game = () => {
 		const characterNumber = parseInt(event.currentTarget.name, 10)
 		const playerId = parseInt(event.currentTarget.id, 10)
 		console.log(playerId, characterNumber)
-		const turn = state.turns.find(
-			(t) => t.characterNumber === characterNumber
-		)
+		const turn = state.turns.find((t) => t.characterNumber === characterNumber)
 
 		if (turn) {
 			if (playerId === turn.playerId) {
@@ -90,9 +88,7 @@ export const Game = () => {
 					...state,
 					turns: [
 						...state.turns.filter(
-							(t) =>
-								t.playerId !== playerId ||
-								t.characterNumber !== characterNumber
+							(t) => t.playerId !== playerId || t.characterNumber !== characterNumber
 						),
 					],
 				})
@@ -125,9 +121,7 @@ export const Game = () => {
 		const turnCharacterNumber = parseInt(event.currentTarget.name, 10)
 		const targetCharacterNumber = parseInt(event.currentTarget.id, 10)
 
-		const turn = state.turns.find(
-			(t) => t.characterNumber === turnCharacterNumber
-		)
+		const turn = state.turns.find((t) => t.characterNumber === turnCharacterNumber)
 
 		if (!turn) {
 			return
@@ -147,9 +141,7 @@ export const Game = () => {
 
 	function RenderTurn(character) {
 		function renderPlayers(p) {
-			const turn = state.turns.find(
-				(t) => t.characterNumber === character.characterNumber
-			)
+			const turn = state.turns.find((t) => t.characterNumber === character.characterNumber)
 
 			return (
 				<Button
@@ -174,18 +166,13 @@ export const Game = () => {
 			if (characterType === 'Thief') {
 				targets = [3, 4, 5, 6, 7, 8]
 
-				if (
-					state.characters.some((c) => c.characterType === 'Assassin')
-				) {
+				if (state.characters.some((c) => c.characterType === 'Assassin')) {
 					const assassinTurn = state.turns.find(
-						(t) =>
-							t.characterNumber === 1 && t.targetCharacterNumber
+						(t) => t.characterNumber === 1 && t.targetCharacterNumber
 					)
 
 					if (assassinTurn) {
-						targets = targets.filter(
-							(t) => t !== assassinTurn.targetCharacterNumber
-						)
+						targets = targets.filter((t) => t !== assassinTurn.targetCharacterNumber)
 					}
 				}
 			}
@@ -204,9 +191,7 @@ export const Game = () => {
 
 			const buttonGroups = []
 
-			const turn = state.turns.find(
-				(t) => t.characterNumber === characterNumber
-			)
+			const turn = state.turns.find((t) => t.characterNumber === characterNumber)
 
 			if (targets.length === 0) {
 				return
@@ -222,9 +207,7 @@ export const Game = () => {
 								onClick={onSelectTarget}
 								color={'primary'}
 								variant={
-									turn?.targetCharacterNumber === c
-										? 'contained'
-										: 'outlined'
+									turn?.targetCharacterNumber === c ? 'contained' : 'outlined'
 								}
 								key={c}
 							>
@@ -273,18 +256,12 @@ export const Game = () => {
 							<h3>{character.characterType}</h3>
 						</Grid>
 						<Grid item xs={6}>
-							<ButtonGroup
-								variant="outlined"
-								aria-label="outlined button group"
-							>
+							<ButtonGroup variant="outlined" aria-label="outlined button group">
 								{state.players.map((p) => renderPlayers(p))}
 							</ButtonGroup>
 						</Grid>
 
-						{renderTargets(
-							character.characterType,
-							character.characterNumber
-						)}
+						{renderTargets(character.characterType, character.characterNumber)}
 					</Grid>
 				</Box>
 			</Grid>
@@ -367,12 +344,7 @@ export const Game = () => {
 					</Button>
 				</Grid>
 				<Grid item xs={12} style={{ paddingTop: '13px' }}>
-					<Button
-						fullWidth
-						variant={'contained'}
-						color={'secondary'}
-						onClick={onEndGame}
-					>
+					<Button fullWidth variant={'contained'} color={'secondary'} onClick={onEndGame}>
 						End Game
 					</Button>
 				</Grid>
@@ -383,9 +355,7 @@ export const Game = () => {
 				aria-labelledby="confirmation-dialog-title"
 				open={state.overlayIsOpen}
 			>
-				<DialogTitle id="confirmation-dialog-title">
-					Enter Scores
-				</DialogTitle>
+				<DialogTitle id="confirmation-dialog-title">Enter Scores</DialogTitle>
 				<DialogContent dividers>
 					<Grid
 						container

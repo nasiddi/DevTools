@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
-import Button from '@material-ui/core/Button'
 import { postForm } from '../BackendClient'
-import { Alert } from '@material-ui/lab'
-import { Checkbox, FormControlLabel, FormGroup, Grid } from '@material-ui/core'
+import { Alert, Button, Checkbox, FormControlLabel, FormGroup, Grid } from '@mui/material'
 
 export const MasterListConverter = () => {
 	const [state, setState] = useState({
@@ -11,6 +9,10 @@ export const MasterListConverter = () => {
 		filetypes: [
 			{
 				name: 'Feriendorf Masterlist',
+				isSelected: false,
+			},
+			{
+				name: 'FerienAmMeer Masterlist',
 				isSelected: false,
 			},
 			{
@@ -124,13 +126,7 @@ export const MasterListConverter = () => {
 	}
 
 	return (
-		<Grid
-			container
-			direction="column"
-			justifyContent="center"
-			alignItems="center"
-			spacing={4}
-		>
+		<Grid container direction="column" justifyContent="center" alignItems="center" spacing={4}>
 			<Grid item xs={12}>
 				<input
 					id="contained-button-file"
@@ -173,9 +169,7 @@ export const MasterListConverter = () => {
 			</Grid>
 			<Grid item xs={12}>
 				{state.alert.message.length > 0 ? (
-					<Alert severity={state.alert.level}>
-						{state.alert.message}
-					</Alert>
+					<Alert severity={state.alert.level}>{state.alert.message}</Alert>
 				) : (
 					<></>
 				)}

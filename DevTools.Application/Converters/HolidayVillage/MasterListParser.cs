@@ -82,8 +82,6 @@ public class MasterListParser
                     TripEndDate: tripEndDate,
                     PickUpLocation: MapPickUpDropOffLocation(p.FirstOrDefault(e => e.Zustieghinfahrt.Length > 0)),
                     DropOffLocation: MapPickUpDropOffLocation(p.FirstOrDefault(e => e.Ausstiegrückfahrt.Length > 0)),
-                    TravelRemarks: p.FirstOrDefault(e => e.Inforeise.Length > 0)?.Inforeise,
-                    HotelRemarks: p.FirstOrDefault(e => e.Infounterbringung.Length > 0)?.Infounterbringung,
                     BikeTransport: bike,
                     Excursions: excursions);
 
