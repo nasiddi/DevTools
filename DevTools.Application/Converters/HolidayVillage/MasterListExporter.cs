@@ -82,6 +82,7 @@ public class MasterListExporter
             RoomType.SUPAP => "SUITE",
             RoomType.OSKMEER => "JS_KITCHEN_SEA",
             RoomType.OSMEER => "JS_SEA",
+            RoomType.OSK => "JS_KITCHEN",
             RoomType.OS => "JS",
             null => null,
             _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)

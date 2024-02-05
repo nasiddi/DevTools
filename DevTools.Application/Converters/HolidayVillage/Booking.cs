@@ -84,7 +84,7 @@ public enum RoomType
         OSMEER,
         OS,
         BABYACC,
-        
+        OSK
 }
 
 public enum CommunicationType
