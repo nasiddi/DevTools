@@ -5,22 +5,13 @@ namespace DevTools.Application.Converters.FaM;
 
 public record Booking(
     int BookingNumber,
+    int? InvoiceNumber,
     string? Email,
     string? PhoneNumber,
-    int? NumberOfParticipants,
     MealPlan MealPlan,
     Group? Group,
-    IReadOnlyList<Room> Rooms);
-
-public record Room(RoomType? RoomType, int RoomReference)
-{
-    public readonly List<Participant> Participants = new();
-
-    public void AddParticipant(Participant participant)
-    {
-        Participants.Add(participant);
-    }
-}
+    bool IsFamilyCombo,
+    IReadOnlyList<Participant> Participants);
 
 public record Participant(
     int ParticipantNumber,
@@ -31,14 +22,21 @@ public record Participant(
     string? IdentificationDocumentNumber,
     string? TravelInfo,
     string? HotelInfo,
+    DateTime CheckIn,
+    DateTime CheckOut,
     ParticipantTravelInformation? ParticipantTravelInformation,
-    int RoomReference)
+    int RoomReference,
+    int CabinReference,
+    CabinType? CabinType,
+    RoomType? RoomType,
+    int? Repeater)
 {
     public bool IsBooker { get; private set; }
-
+    
     public void SetAsBooker()
     {
-        IsBooker = true;
+        IsBooker = RoomType == FaM.RoomType.E44;
+        
     }
 }
 
@@ -79,30 +77,44 @@ public enum MealPlan
 public enum RoomType
 {
     BABYACC,
-    D44,
     DGV,
-    DMP,
+    SGV,
+    TGV,
     DSP,
+    SSP,
+    TSP,
+    DMP,
+    SSPSV,
+    TMP,
     DSV,
-    E44,
-    EM44,
-    EPM44,
-    FAP,
+    SSV,
+    TSV,
     FAS,
-    FPM,
+    FAP,
     FSM,
     FSR,
+    FPM,
+    MEHRBE,
+    D44,
+    E44,
     M44,
+    EM44,
+    EPM44,
     P44,
-    PM44,
-    SGV,
-    SSP,
-    SSPSV,
-    SSV,
-    TGV,
-    TMP,
-    TSP,
-    TSV
+    PM44
+}
+
+public enum CabinType
+{
+    G1A,
+    G1I,
+    G2A,
+    G2I,
+    G3A,
+    G3I,
+    G4A,
+    G4I,
+    Pullman
 }
 
 public enum Airport
