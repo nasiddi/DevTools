@@ -23,8 +23,8 @@ public class MasterListExportRow
     public Transport? TripEndTransport { get; set; }
     public DateTime? TripEndDate { get; set; }
     public Airport? OutboundAirport { get; set; }
-    public DateTime CheckIn { get; set; }
-    public DateTime CheckOut { get; set; }
+    public DateTime? CheckIn { get; set; }
+    public DateTime? CheckOut { get; set; }
     public string? RoomType { get; set; }
     public int RoomReference { get; set; }
     public int? InvoiceNumber { get; set; }

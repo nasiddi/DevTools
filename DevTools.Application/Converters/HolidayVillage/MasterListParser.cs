@@ -185,6 +185,7 @@ public class MasterListParser
             "SUPAPMEER" => RoomType.SUPAPMEER,
             "SUPAP" => RoomType.SUPAP,
             "OSKMEER" => RoomType.OSKMEER,
+            "OSK" => RoomType.OSK,
             "OSMEER" => RoomType.OSMEER,
             "OS" => RoomType.OS,
             "BABYACC" => RoomType.BABYACC,
