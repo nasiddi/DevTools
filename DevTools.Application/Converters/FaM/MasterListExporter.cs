@@ -7,6 +7,40 @@ namespace DevTools.Application.Converters.FaM;
 
 public class MasterListExporter
 {
+    public static ImmutableList<MasterListStaffExportRow> ExportFaMStaff(IReadOnlyList<Participant> staff)
+    {
+        var sortedStaff = staff
+            .OrderBy(r => r.ParticipantTravelInformation?.TripStartDate)
+            .ThenBy(r => r.FamilyName);
+
+        return sortedStaff.Select(e => new MasterListStaffExportRow
+        {
+            RatioPersonNumber = e.ParticipantNumber,
+            LastName = e.FamilyName,
+            FirstName = e.FirstName,
+            RemarksBooking = e.Staff!.RemarksBooking,
+            RemarksTravelers = e.Staff.RemarksParticipants,
+            Team = e.Staff.Team,
+            Profession = e.Staff.Profession,
+            SpecialSkills = e.Staff.Skills,
+            SmallGroupLeader = e.Staff.SmallGroupLeader,
+            ChurchService = e.Staff.GvCService,
+            DriversLicence = e.Staff.DriversLicence,
+            LicenceSince = e.Staff.LicenceDate,
+            WouldDrive = e.Staff.WouldDrive,
+            HasCar = e.Staff.HaveCar,
+            CarDetails = e.Staff.CarDetails,
+            HelpDuringService = e.Staff.ServiceHelp,
+            Band = e.Staff.Band,
+            Theater = e.Staff.Theater,
+            Technic = e.Staff.Technic,
+            Singing = e.Staff.Singing,
+            WorshipDance = e.Staff.WorshipDance,
+            ChildCare = e.Staff.ChildCare,
+            MusicInstrument = e.Staff.Instruments
+        }).ToImmutableList();
+    }
+
     public static ImmutableList<MasterListExportRow> ExportFaM(IReadOnlyList<Booking> bookings)
     {
         var sortedBookings = bookings
@@ -43,7 +77,7 @@ public class MasterListExporter
                     CheckIn = p.CheckIn,
                     CheckOut = p.CheckOut,
                     TravelInfo = p.TravelInfo,
-                    HotelInfo = p.HotelInfo ?? (roomCount > 1 ? "Family Combo" : null),
+                    HotelInfo = p.HotelInfo ?? (roomCount > 1 && booking.IsFamilyCombo ? "Family Combo" : null),
                     RoomType = MapRoomType(p.RoomType),
                     RoomReference = p.RoomReference,
                     InvoiceNumber = booking.InvoiceNumber,

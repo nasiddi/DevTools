@@ -39,7 +39,7 @@ public class LufthansaGroupPaxExporter
                 LastName = CleanText(e.Person.LastName)!,
                 FirstName = CleanText(e.Person.FirstName)!,
                 MiddleName = CleanText(e.Person.MiddleName),
-                Title = MapTitle(e.Person.Gender),
+                SalutationTitle = MapTitle(e.Person.Gender),
                 PaxType = isChild ? "CHD" : null,
                 DateOfBirth = isChild ? e.Person.DateOfBirth?.ToString("dd-MMM-yyyy").ToUpper() : null,
                 Gender = null,
@@ -47,6 +47,7 @@ public class LufthansaGroupPaxExporter
                 FrequentFlyerNumber = e.FrequentFlyerNumber,
                 InfantLastName = CleanText(e.Infant?.LastName),
                 InfantFirstName = CleanText(e.Infant?.FirstName),
+                InfantGender = null,
                 InfantDateOfBirth = e.Infant?.DateOfBirth?.ToString("dd-MMM-yyyy").ToUpper(),
                 AssociatedExtraSeat = null,
                 TravelDocumentType = null,
@@ -78,7 +79,7 @@ public class LufthansaGroupPaxExporter
             .Select(i => (ColumnData: i.ColumnData, ColumnMeta: i.ColumnMeta!))
             .ToImmutableList();
 
-        var rowIndex = 2;
+        var rowIndex = 5;
         
         foreach (var row in rows)
         {

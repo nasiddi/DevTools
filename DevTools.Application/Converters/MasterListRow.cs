@@ -18,7 +18,7 @@ public class MasterListRow
     public int? NumberOfParticipants { get; set; }
     public string FormOfAddress { get; set; }
     public string EmptyTitle { get; set; }
-    public int Titel { get; set; }
+    public int? Titel { get; set; }
     public string BookerFirstName { get; set; }
     public string BookerLastName { get; set; }
     public string EmptyBookerName { get; set; }
@@ -70,11 +70,16 @@ public class MasterListRow
     public string Leistungsart { get; set; }
     public string Leistungscode { get; set; }
     public string Kontingentcode { get; set; }
+    public DateTime? LeistungVon { get; set; }
+    public DateTime? LeistungBis { get; set; }
     public string Leistung { get; set; }
     public int? Reiseleistungsnr { get; set; }
     public int? Leistungsstammnr { get; set; }
     public int? Belegungsnr { get; set; }
     public int Vorgangnr { get; set; }
+    public string InternalRemarks { get; set; }
+
+    
 }
 
 public class MasterListRowClassMap : ClassMap<MasterListRow>
@@ -143,12 +148,15 @@ public class MasterListRowClassMap : ClassMap<MasterListRow>
         Map(m => m.Leistungstyp).Name("Leistungstyp");
         Map(m => m.Leistungsart).Name("Leistungsart");
         Map(m => m.Leistungscode).Name("Leistungscode");
+        Map(m => m.LeistungVon).Name("Leistung von").TypeConverter<SwissDateTimeConverter>();
+        Map(m => m.LeistungBis).Name("Leistung bis").TypeConverter<SwissDateTimeConverter>();
         Map(m => m.Kontingentcode).Name("Kontingentcode");
         Map(m => m.Leistung).Name("Leistung");
         Map(m => m.Reiseleistungsnr).Name("Reiseleistungsnr");
         Map(m => m.Leistungsstammnr).Name("Leistungsstammnr");
         Map(m => m.Belegungsnr).Name("Belegungsnr");
         Map(m => m.Vorgangnr).Name("Vorgangnr");
+        Map(m => m.InternalRemarks).Name("Interne_bemerkung");
     }
 }
 

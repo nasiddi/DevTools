@@ -23,8 +23,6 @@ public class MasterListParser
     {
         var rows = arg.ToList();
 
-        var numberOfParticipants =
-            rows.SingleOrDefault(e => e.NumberOfParticipants.HasValue)?.NumberOfParticipants!.Value;
         var email = rows.Select(e => e.Email).Where(e => e.Length > 0).Distinct().SingleOrDefault();
         var phoneNumber = rows.Select(e => e.Phone2).Where(e => e.Length > 0).Distinct().SingleOrDefault();
         var tripStartDate = rows.Select(e => e.TripStartDate).Distinct().Single();
@@ -36,8 +34,10 @@ public class MasterListParser
         var groupedParticipantsRows = nonBabyParticipantRows.GroupBy(e => e.Teilnehmernr);
         var isFamilyCombo = rows.Any(r => r.Leistungscode.StartsWith("FAMPAK"));
 
+        var travelGroup = MapGroup(rows);
+
         var participants = groupedParticipantsRows
-            .Select(p => MapParticipant(p, tripStartDate, tripEndDate)).ToList();
+            .Select(p => MapParticipant(p, tripStartDate, tripEndDate, travelGroup)).ToList();
 
         var booker = participants.FirstOrDefault(e => e.FirstName == rows.First().BookerFirstName)
                      ?? participants.FirstOrDefault(e => rows.First().BookerFirstName.Contains(e.FirstName))
@@ -55,7 +55,7 @@ public class MasterListParser
             PhoneNumber: phoneNumber,
             Participants: participants.OrderBy(e => e.RoomReference).ThenBy(e => e.DateOfBirth).ToList(),
             MealPlan: MapMealPlan(rows),
-            Group: MapGroup(rows),
+            Group: travelGroup,
             IsFamilyCombo: isFamilyCombo);
     }
 
@@ -63,7 +63,7 @@ public class MasterListParser
         DateTime tripEndDate, Participant booker)
     {
         var groupedBabyRows = babyRows.GroupBy(e => e.Teilnehmernr);
-        var babies = groupedBabyRows.Select(p => MapParticipant(p, tripStartDate, tripEndDate, booker))
+        var babies = groupedBabyRows.Select(p => MapParticipant(p, tripStartDate, tripEndDate, null, booker))
             .ToList();
         return babies;
     }
@@ -72,6 +72,7 @@ public class MasterListParser
         IGrouping<int, MasterListRow> participant,
         DateTime tripStartDate,
         DateTime tripEndDate,
+        Group? travelGroup,
         Participant? booker = default)
     {
         var name = participant.DistinctBy(e => e.Teilnehmername).Single().Teilnehmername;
@@ -125,25 +126,39 @@ public class MasterListParser
             OutboundAirport: GetGreekAirport(participant, isInbound: false) ??
                              booker?.ParticipantTravelInformation?.OutboundAirport);
 
-        var checkIn = participantTravelInformation.Transport switch
-        {
-            Transport.Ferry => tripStartDate.AddDays(1),
-            Transport.Flight or Transport.Individually => tripStartDate,
-            _ => throw new ArgumentOutOfRangeException()
-        };
+        var checkIn = room is not null && tripStartDate != room.LeistungVon
+            ? room.LeistungVon!.Value
+            : participantTravelInformation.Transport switch
+            {
+                Transport.Ferry => tripStartDate.AddDays(1),
+                Transport.Flight or Transport.Individually => tripStartDate,
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
-        var checkOut = participantTravelInformation.Transport switch
-        {
-            Transport.Ferry => tripEndDate.AddDays(-1),
-            Transport.Flight or Transport.Individually => tripEndDate,
-            _ => throw new ArgumentOutOfRangeException()
-        };
+        var checkOut = room is not null && tripEndDate != room.LeistungBis
+            ? room.LeistungBis!.Value
+            : participantTravelInformation.Transport switch
+            {
+                Transport.Ferry => tripEndDate.AddDays(-1),
+                Transport.Flight or Transport.Individually => tripEndDate,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+        var internalRemarks = participant.DistinctBy(e => e.InternalRemarks)
+            .FirstOrDefault(e => e.InternalRemarks != string.Empty)
+            ?.InternalRemarks ?? string.Empty;
+
+        var firstName = nameList.Length > 1 ? nameList[1] : string.Empty;
+
+
+        var staff = travelGroup == Group.Staff ? StaffParser.Parse(internalRemarks, firstName) : null;
+        
 
         var p = new Participant(
             ParticipantNumber: participant.DistinctBy(e => e.Teilnehmernr).Single().Teilnehmernr,
             Gender: MapGender(participant.FirstOrDefault(e => e.Teilnehmeranrede.Length > 0)?.Teilnehmeranrede),
             FamilyName: nameList[0],
-            FirstName: nameList.Length > 1 ? nameList[1] : string.Empty,
+            FirstName: firstName,
             DateOfBirth: dateOfBirth,
             IdentificationDocumentNumber: travelDocumentNumber,
             TravelInfo: travelInfo,
@@ -155,7 +170,8 @@ public class MasterListParser
             CabinReference: booker?.CabinReference ?? cabinReference ?? 0,
             CabinType: booker?.CabinType ?? cabinType,
             RoomType: booker?.RoomType ?? roomType,
-            Repeater: repeater);
+            Repeater: repeater,
+            Staff: staff);
 
         return p;
     }
@@ -239,6 +255,11 @@ public class MasterListParser
         if (rows.Any(e => e.TripCode.Contains("FAMEW")))
         {
             return Group.EmpoweringWeek;
+        }
+
+        if (rows.Any(e => e.TripCode.Contains("STAFF")))
+        {
+            return Group.Staff;
         }
 
         return null;

@@ -81,7 +81,7 @@ public class ListConversionController : ControllerBase
         
         if (listTypes.Contains(ListType.FerienAmMeerMasterList))
         {
-            files.Add(FaMConverter.ConvertToFaM(rows));
+            files.AddRange(FaMConverter.ConvertToFaM(rows));
         }
         
         if (listTypes.Contains(ListType.RoomList))

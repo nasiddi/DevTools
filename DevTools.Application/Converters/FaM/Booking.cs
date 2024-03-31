@@ -29,7 +29,8 @@ public record Participant(
     int CabinReference,
     CabinType? CabinType,
     RoomType? RoomType,
-    int? Repeater)
+    int? Repeater,
+    Staff? Staff)
 {
     public bool IsBooker { get; private set; }
     
@@ -123,4 +124,35 @@ public enum Airport
     KLX,
     GPA,
     ATH
+}
+
+public record Staff(
+    string RemarksBooking,
+    string RemarksParticipants,
+    string Name,
+    Team Team,
+    string Profession,
+    string Skills,
+    string SmallGroupLeader,
+    string GvCService,
+    string DriversLicence,
+    string LicenceDate,
+    bool WouldDrive,
+    bool HaveCar,
+    string CarDetails,
+    string ServiceHelp,
+    bool Band,
+    bool Theater,
+    bool Technic,
+    bool Singing,
+    bool WorshipDance,
+    bool ChildCare,
+    string Instruments
+);
+
+public enum Team
+{
+    Adults,
+    Youth,
+    Kids
 }
