@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using HueIrisColorTask = DevTools.Application.BackgroundTasks.HueIrisColorTask;
 using SpaDeployTask = DevTools.Application.BackgroundTasks.SpaDeployTask;
 
 namespace DevTools.Application;
@@ -32,7 +31,5 @@ public class Program
             {
                 services.AddSingleton<SpaDeployTask>();
                 services.AddHostedService(implementationFactory: p => p.GetRequiredService<SpaDeployTask>());
-                services.AddSingleton<HueIrisColorTask>();
-                services.AddHostedService(implementationFactory: p => p.GetRequiredService<HueIrisColorTask>());
             });
 }

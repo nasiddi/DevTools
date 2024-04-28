@@ -21,13 +21,13 @@ public record Participant(
     DateTime? DateOfBirth,
     string? IdentificationDocumentNumber,
     string? TravelInfo,
+    string? FerryInfo,
     string? HotelInfo,
     DateTime CheckIn,
     DateTime CheckOut,
-    ParticipantTravelInformation? ParticipantTravelInformation,
+    ParticipantTravelInformation InboundTravelInfo,
+    ParticipantTravelInformation OutboundTravelInfo,
     int RoomReference,
-    int CabinReference,
-    CabinType? CabinType,
     RoomType? RoomType,
     int? Repeater,
     Staff? Staff)
@@ -43,10 +43,10 @@ public record Participant(
 
 public record ParticipantTravelInformation(
     Transport Transport,
-    DateTime TripStartDate,
-    DateTime TripEndDate,
-    Airport? InboundAirport,
-    Airport? OutboundAirport);
+    DateTime Date,
+    Airport? Airport,
+    int? CabinReference,
+    CabinType? CabinType);
 
 public enum Gender
 {
@@ -107,15 +107,23 @@ public enum RoomType
 
 public enum CabinType
 {
-    G1A,
+    EKAUS,
     G1I,
-    G2A,
+    DKAUSS,
     G2I,
-    G3A,
+    ThreeBEAUSS,
     G3I,
-    G4A,
+    ABEAUSS,
     G4I,
-    Pullman
+    GDI,
+    G1IR,
+    G2IR,
+    G3IR,
+    G4IR,
+    ThreeBEAUSSR,
+    ABEAUSSR,
+    DKAUSSR,
+    EKAUSSR
 }
 
 public enum Airport

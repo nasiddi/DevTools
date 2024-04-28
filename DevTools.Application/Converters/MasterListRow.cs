@@ -63,6 +63,7 @@ public class MasterListRow
     public string Inforeise { get; set; }
     public string Ref1 { get; set; }
     public string Ref2 { get; set; }
+    public string InfoFerry { get; set; }
     public int Teilnehmernr { get; set; }
     public string Zustieghinfahrt { get; set; }
     public string Ausstiegrückfahrt { get; set; }
@@ -142,6 +143,7 @@ public class MasterListRowClassMap : ClassMap<MasterListRow>
         Map(m => m.Inforeise).Name("Info reise");
         Map(m => m.Ref1).Name("Ref1");
         Map(m => m.Ref2).Name("Ref2");
+        Map(m => m.InfoFerry).Name("Infofaehre").Optional();
         Map(m => m.Teilnehmernr).Name("Teilnehmernr");
         Map(m => m.Zustieghinfahrt).Name("Zustieg hinfahrt");
         Map(m => m.Ausstiegrückfahrt).Name("Ausstieg rückfahrt");

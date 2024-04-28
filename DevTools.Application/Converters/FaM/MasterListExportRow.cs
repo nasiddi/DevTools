@@ -28,8 +28,11 @@ public class MasterListExportRow
     public string? RoomType { get; set; }
     public int RoomReference { get; set; }
     public int? InvoiceNumber { get; set; }
-    public string? CabinType { get; set; }
-    public int CabinReference { get; set; }
+    public string? InboundCabinType { get; set; }
+    public int InboundCabinReference { get; set; }
+    public string? OutboundCabinType { get; set; }
+    public int OutboundCabinReference { get; set; }
+    public string? FerryInfo { get; set; }
     public MealPlan MealPlan { get; set; }
     public string? TravelInfo { get; set; }
     public string? HotelInfo { get; set; }

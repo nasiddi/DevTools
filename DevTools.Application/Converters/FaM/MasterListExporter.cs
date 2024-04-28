@@ -10,7 +10,7 @@ public class MasterListExporter
     public static ImmutableList<MasterListStaffExportRow> ExportFaMStaff(IReadOnlyList<Participant> staff)
     {
         var sortedStaff = staff
-            .OrderBy(r => r.ParticipantTravelInformation?.TripStartDate)
+            .OrderBy(r => r.InboundTravelInfo.Date)
             .ThenBy(r => r.FamilyName);
 
         return sortedStaff.Select(e => new MasterListStaffExportRow
@@ -44,7 +44,7 @@ public class MasterListExporter
     public static ImmutableList<MasterListExportRow> ExportFaM(IReadOnlyList<Booking> bookings)
     {
         var sortedBookings = bookings
-            .OrderBy(r => r.Participants.Min(p => p.ParticipantTravelInformation?.TripStartDate))
+            .OrderBy(r => r.Participants.Min(p => p.InboundTravelInfo.Date))
             .ThenBy(r => r.Participants.Min(p => p.FamilyName));
 
         var rows = new List<MasterListExportRow>();
@@ -68,12 +68,12 @@ public class MasterListExporter
                     DateOfBirth = p.DateOfBirth,
                     Group = booking.Group,
                     DocumentNumber = p.IdentificationDocumentNumber,
-                    TripStartTransport = p.ParticipantTravelInformation?.Transport,
-                    TripStartDate = p.ParticipantTravelInformation?.TripStartDate,
-                    InboundAirport = p.ParticipantTravelInformation?.InboundAirport,
-                    TripEndTransport = p.ParticipantTravelInformation?.Transport,
-                    TripEndDate = p.ParticipantTravelInformation?.TripEndDate,
-                    OutboundAirport = p.ParticipantTravelInformation?.OutboundAirport,
+                    TripStartTransport = p.InboundTravelInfo.Transport,
+                    TripStartDate = p.InboundTravelInfo.Date,
+                    InboundAirport = p.InboundTravelInfo.Airport,
+                    TripEndTransport = p.OutboundTravelInfo.Transport,
+                    TripEndDate = p.CheckOut.Date,
+                    OutboundAirport = p.OutboundTravelInfo.Airport,
                     CheckIn = p.CheckIn,
                     CheckOut = p.CheckOut,
                     TravelInfo = p.TravelInfo,
@@ -81,8 +81,11 @@ public class MasterListExporter
                     RoomType = MapRoomType(p.RoomType),
                     RoomReference = p.RoomReference,
                     InvoiceNumber = booking.InvoiceNumber,
-                    CabinType = MapCabinType(p.CabinType),
-                    CabinReference = p.CabinReference,
+                    InboundCabinType = MapCabinType(p.InboundTravelInfo.CabinType),
+                    InboundCabinReference = p.InboundTravelInfo.CabinReference ?? 0,
+                    OutboundCabinType = MapCabinType(p.OutboundTravelInfo.CabinType),
+                    OutboundCabinReference = p.OutboundTravelInfo.CabinReference ?? 0,
+                    FerryInfo = p.FerryInfo,
                     MealPlan = booking.MealPlan,
                     PhoneNumber = booking.PhoneNumber,
                     Email = booking.Email,
@@ -129,15 +132,15 @@ public class MasterListExporter
     {
         return cabinType switch
         {
-            CabinType.G1A => "Einzelkabine Aussen",
-            CabinType.G1I => "Einzelkabine Innen",
-            CabinType.G2A => "Doppelkabine Aussen",
-            CabinType.G2I => "Doppelkabine Innen",
-            CabinType.G3A => "Dreierkabine Aussen",
-            CabinType.G3I => "Dreierkabine Innen",
-            CabinType.G4A => "Viererkabine Aussen",
-            CabinType.G4I => "Viererkabine Innen",
-            CabinType.Pullman => "Sitzplatz",
+            CabinType.EKAUS or CabinType.EKAUSSR => $"{cabinType.ToString()} / Einzelkabine Aussen",
+            CabinType.G1I or CabinType.G1IR => $"{cabinType.ToString()} / Einzelkabine Innen",
+            CabinType.DKAUSS or CabinType.DKAUSSR => $"{cabinType.ToString()} / Doppelkabine Aussen",
+            CabinType.G2I or CabinType.G2IR => $"{cabinType.ToString()} / Doppelkabine Innen",
+            CabinType.ThreeBEAUSS or CabinType.ThreeBEAUSSR => $"{cabinType.ToString()!.Replace("Three", "3")} / Dreierkabine Aussen",
+            CabinType.G3I or CabinType.G3IR => $"{cabinType.ToString()} / Dreierkabine Innen",
+            CabinType.ABEAUSS or CabinType.ABEAUSSR => $"{cabinType.ToString()} / Viererkabine Aussen",
+            CabinType.G4I or CabinType.G4IR => $"{cabinType.ToString()} / Viererkabine Innen",
+            CabinType.GDI => $"{cabinType.ToString()} / DeckPassage",
             null => null,
             _ => throw new ArgumentOutOfRangeException(nameof(cabinType), cabinType, null)
         };

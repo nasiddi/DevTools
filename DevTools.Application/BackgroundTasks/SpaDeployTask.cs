@@ -11,7 +11,7 @@ namespace DevTools.Application.BackgroundTasks;
 public class SpaDeployTask : IHostedService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    public bool IsEnabled { get; set; }
+    public bool IsEnabled { get; set; } = false;
     public bool IsRunning { get; set; }
     public bool RunImmediately { get; set; }
     public bool HasChanged { get; private set; } = true;
