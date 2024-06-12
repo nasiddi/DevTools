@@ -10,6 +10,8 @@ public static class StaffParser
     {
         var personSections = Regex.Split(input.Split("***").Last(), @"\*(.*?)\*");
 
+        var sections = personSections.Skip(1).Chunk(2).Select(e => new Section(e[0], e[1]));
+        
         var remarksParticipantsMatch = Regex.Match(input, @"\*\*\*Reisende\*\*\*(.*?)\*\*\*Zusatzdaten Reisende\*\*\*",
             RegexOptions.Singleline);
 
@@ -20,15 +22,19 @@ public static class StaffParser
 
         var remarksBooking = remarksBookingMatch.Groups[1].Value.Trim();
 
-
-        foreach (var section in personSections)
+        foreach (var (name, content) in sections)
         {
-            if (string.IsNullOrWhiteSpace(section))
+            if (!name.Contains(firstName))
+            {
+                continue;
+            }
+            
+            if (string.IsNullOrWhiteSpace(content))
             {
                 continue;
             }
 
-            var teamMatch = Regex.Match(input, @"Ich melde mich an für:(.*?)Mein Beruf:", RegexOptions.Singleline);
+            var teamMatch = Regex.Match(content, @"Ich melde mich an für:(.*?)Mein Beruf:", RegexOptions.Singleline);
             Team? team = teamMatch.Groups[1].Value.Trim() switch
             {
                 "Erwachsene" => Team.Adults,
@@ -42,42 +48,32 @@ public static class StaffParser
                 continue;
             }
 
-            var nameMatch = Regex.Match(input, @"\*\*\*Zusatzdaten Reisende\*\*\*(.*?)Ich melde mich an für:",
-                RegexOptions.Singleline);
-
-            var name = nameMatch.Groups[1].Value.Trim().Trim('*');
-
-            if (!name.Contains(firstName))
-            {
-                return null;
-            }
-
             var professionMatch =
-                Regex.Match(input, @"Mein Beruf:(.*?)Besondere Fähigkeiten:", RegexOptions.Singleline);
-            var skillsMatch = Regex.Match(input, @"Besondere Fähigkeiten:(.*?)Kleingruppenleiter:",
+                Regex.Match(content, @"Mein Beruf:(.*?)Besondere Fähigkeiten:", RegexOptions.Singleline);
+            var skillsMatch = Regex.Match(content, @"Besondere Fähigkeiten:(.*?)Kleingruppenleiter:",
                 RegexOptions.Singleline);
-            var smallGroupLeaderMatch = Regex.Match(input, @"Kleingruppenleiter:(.*?)Mein Dienst in der GvC:",
+            var smallGroupLeaderMatch = Regex.Match(content, @"Kleingruppenleiter:(.*?)Mein Dienst in der GvC:",
                 RegexOptions.Singleline);
-            var gvcServiceMatch = Regex.Match(input, @"Mein Dienst in der GvC:(.*?)Fahrausweis und Kategorie:",
+            var gvcServiceMatch = Regex.Match(content, @"Mein Dienst in der GvC:(.*?)Fahrausweis und Kategorie:",
                 RegexOptions.Singleline);
-            var driversLicenceMatch = Regex.Match(input,
+            var driversLicenceMatch = Regex.Match(content,
                 @"Fahrausweis und Kategorie:(.*?)Falls Fahrausweis vorhanden  seit wann\?:", RegexOptions.Singleline);
-            var licenceDateMatch = Regex.Match(input, @"Falls Fahrausweis vorhanden  seit wann\?:(.*?)Ich würde fahren:",
+            var licenceDateMatch = Regex.Match(content, @"Falls Fahrausweis vorhanden  seit wann\?:(.*?)Ich würde fahren:",
                 RegexOptions.Singleline);
             var wouldDriveMatch =
-                Regex.Match(input, @"Ich würde fahren:(.*?)Auto vorhanden\?:", RegexOptions.Singleline);
-            var haveCarMatch = Regex.Match(input, @"Auto vorhanden\?:(.*?)Marke  Typ und Kontrollschild:",
+                Regex.Match(content, @"Ich würde fahren:(.*?)Auto vorhanden\?:", RegexOptions.Singleline);
+            var haveCarMatch = Regex.Match(content, @"Auto vorhanden\?:(.*?)Marke  Typ und Kontrollschild:",
                 RegexOptions.Singleline);
-            var carDetailsMatch = Regex.Match(input, @"Marke  Typ und Kontrollschild:(.*?)Helfer Auswahl:",
+            var carDetailsMatch = Regex.Match(content, @"Marke  Typ und Kontrollschild:(.*?)Helfer Auswahl:",
                 RegexOptions.Singleline);
-            var serviceHelpMatch = Regex.Match(input, @"Helfer Auswahl:(.*?)Band:", RegexOptions.Singleline);
-            var bandMatch = Regex.Match(input, @"Band:(.*?)Theater:", RegexOptions.Singleline);
-            var theaterMatch = Regex.Match(input, @"Theater:(.*?)Technik:", RegexOptions.Singleline);
-            var technikMatch = Regex.Match(input, @"Technik:(.*?)Singen:", RegexOptions.Singleline);
-            var singenMatch = Regex.Match(input, @"Singen:(.*?)Worshipdance:", RegexOptions.Singleline);
-            var worshipDanceMatch = Regex.Match(input, @"Worshipdance:(.*?)Kinderhüte:", RegexOptions.Singleline);
-            var kinderhüteMatch = Regex.Match(input, @"Kinderhüte:(.*?)Musikinstrument:", RegexOptions.Singleline);
-            var instrumentsMatch = Regex.Match(input, @"Musikinstrument:\s+(.*?)(?=\s*\*|$)", RegexOptions.Singleline);
+            var serviceHelpMatch = Regex.Match(content, @"Helfer Auswahl:(.*?)Band:", RegexOptions.Singleline);
+            var bandMatch = Regex.Match(content, @"Band:(.*?)Theater:", RegexOptions.Singleline);
+            var theaterMatch = Regex.Match(content, @"Theater:(.*?)Technik:", RegexOptions.Singleline);
+            var technikMatch = Regex.Match(content, @"Technik:(.*?)Singen:", RegexOptions.Singleline);
+            var singenMatch = Regex.Match(content, @"Singen:(.*?)Worshipdance:", RegexOptions.Singleline);
+            var worshipDanceMatch = Regex.Match(content, @"Worshipdance:(.*?)Kinderhüte:", RegexOptions.Singleline);
+            var kinderhüteMatch = Regex.Match(content, @"Kinderhüte:(.*?)Musikinstrument:", RegexOptions.Singleline);
+            var instrumentsMatch = Regex.Match(content, @"Musikinstrument:\s+(.*?)(?=\s*\*|$)", RegexOptions.Singleline);
 
             var profession = professionMatch.Groups[1].Value.Clean();
             var skills = skillsMatch.Groups[1].Value.Clean();
@@ -132,4 +128,6 @@ public static class StaffParser
         var str = value.Trim().Replace("  ", ", ");
         return str.Length == 1 ? str.Replace("-", string.Empty) : str;
     }
+
+    private record Section(string Name, string Content);
 }

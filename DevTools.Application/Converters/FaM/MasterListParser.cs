@@ -47,7 +47,7 @@ public class MasterListParser
         booker.SetAsBooker();
         var babies = GetBabies(babyRows, tripStartDate, tripEndDate, booker);
         participants.AddRange(babies);
-        
+
         return new Booking(
             BookingNumber: arg.Key,
             rows.First().InvoiceNumber,
@@ -160,10 +160,12 @@ public class MasterListParser
         bool isInBound)
     {
         var cabinType = TryGetCabinType(participant, isInbound: isInBound);
-        
-        var cabinReference = participant
-            .FirstOrDefault(e => cabinType.HasValue && e.Leistungscode == cabinType.Value.ToString())
-            ?.Belegungsnr;
+
+        var cabinReference =
+            (isInBound ? booker?.InboundTravelInfo.CabinReference : booker?.OutboundTravelInfo.CabinReference)
+            ?? participant
+                .FirstOrDefault(e => cabinType.HasValue && e.Leistungscode == cabinType.Value.ToString())
+                ?.Belegungsnr;
 
         var greekAirport = GetGreekAirport(participant, isInbound: isInBound) ?? booker?.InboundTravelInfo?.Airport;
 
@@ -206,18 +208,20 @@ public class MasterListParser
         var groupedRows = participant.Where(e => e.Leistungsart == "T-Schiff" && !e.Leistungscode.Contains("-"))
             .GroupBy(e => e.LeistungVon)
             .ToList();
-        
+
         if (!groupedRows.Any())
         {
             return null;
         }
 
-        var relevantRows = isInbound ? groupedRows.MinBy(e => e.Key)?.ToList() : groupedRows.MaxBy(e => e.Key)?.ToList();
-        
+        var relevantRows =
+            isInbound ? groupedRows.MinBy(e => e.Key)?.ToList() : groupedRows.MaxBy(e => e.Key)?.ToList();
+
         if (relevantRows is null)
         {
             return null;
         }
+
         var codes = relevantRows.Select(e => e.Leistungscode).ToList();
 
 
@@ -343,22 +347,6 @@ public class MasterListParser
             "F" => Gender.Female,
             "H" => Gender.Male,
             _ => null
-        };
-    }
-
-    private static int? GetNumberOfBeds(RoomType? roomType)
-    {
-        return roomType switch
-        {
-            RoomType.DGV or RoomType.DSP or RoomType.DMP or RoomType.DSV or RoomType.D44 or RoomType.M44 or RoomType.P44
-                or RoomType.PM44 => 2,
-            RoomType.SGV or RoomType.SSP or RoomType.SSPSV or RoomType.SSV or RoomType.E44 or RoomType.EM44
-                or RoomType.EPM44 => 1,
-            RoomType.TGV or RoomType.TSP or RoomType.TMP or RoomType.TSV => 3,
-            RoomType.FAS or RoomType.FAP or RoomType.FSM or RoomType.FSR or RoomType.FPM => 4,
-            RoomType.MEHRBE => 50,
-            null => null,
-            _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
         };
     }
 }
