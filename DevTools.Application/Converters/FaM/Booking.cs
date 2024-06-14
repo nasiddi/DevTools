@@ -137,7 +137,6 @@ public enum Airport
 public record Staff(
     string RemarksBooking,
     string RemarksParticipants,
-    string Name,
     Team Team,
     string Profession,
     string Skills,

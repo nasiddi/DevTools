@@ -96,7 +96,6 @@ public static class StaffParser
             var staff = new Staff(
                 RemarksParticipants: remarksParticipants,
                 RemarksBooking: remarksBooking,
-                Name: name,
                 Team: team.Value,
                 Profession: profession,
                 Skills: skills,

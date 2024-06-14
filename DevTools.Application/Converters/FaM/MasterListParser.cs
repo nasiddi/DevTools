@@ -126,8 +126,7 @@ public class MasterListParser
 
         var firstName = nameList.Length > 1 ? nameList[1] : string.Empty;
 
-
-        var staff = travelGroup == Group.Staff ? StaffParser.Parse(internalRemarks, firstName) : null;
+        var staff = travelGroup == Group.Staff ? StaffParser.Parse(internalRemarks, firstName.Split(" ")[0]) : null;
 
         var car = participant.FirstOrDefault(e => e.InfoFerry.Length > 0)?.InfoFerry;
 
