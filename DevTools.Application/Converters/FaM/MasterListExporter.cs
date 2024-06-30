@@ -72,7 +72,7 @@ public class MasterListExporter
                     TripStartDate = p.InboundTravelInfo.Date,
                     InboundAirport = p.InboundTravelInfo.Airport,
                     TripEndTransport = p.OutboundTravelInfo.Transport,
-                    TripEndDate = p.CheckOut.Date,
+                    TripEndDate = p.OutboundTravelInfo.Date,
                     OutboundAirport = p.OutboundTravelInfo.Airport,
                     CheckIn = p.CheckIn,
                     CheckOut = p.CheckOut,
@@ -132,15 +132,15 @@ public class MasterListExporter
     {
         return cabinType switch
         {
-            CabinType.EKAUS or CabinType.EKAUSSR => $"{cabinType.ToString()} / Einzelkabine Aussen",
-            CabinType.G1I or CabinType.G1IR => $"{cabinType.ToString()} / Einzelkabine Innen",
-            CabinType.DKAUSS or CabinType.DKAUSSR => $"{cabinType.ToString()} / Doppelkabine Aussen",
-            CabinType.G2I or CabinType.G2IR => $"{cabinType.ToString()} / Doppelkabine Innen",
-            CabinType.ThreeBEAUSS or CabinType.ThreeBEAUSSR => $"{cabinType.ToString()!.Replace("Three", "3")} / Dreierkabine Aussen",
-            CabinType.G3I or CabinType.G3IR => $"{cabinType.ToString()} / Dreierkabine Innen",
-            CabinType.ABEAUSS or CabinType.ABEAUSSR => $"{cabinType.ToString()} / Viererkabine Aussen",
-            CabinType.G4I or CabinType.G4IR => $"{cabinType.ToString()} / Viererkabine Innen",
-            CabinType.GDI => $"{cabinType.ToString()} / DeckPassage",
+            CabinType.EKAUS or CabinType.EKAUSSR => $"{cabinType?.ToCustomString()} / Einzelkabine Aussen",
+            CabinType.G1I or CabinType.G1IR => $"{cabinType?.ToCustomString()} / Einzelkabine Innen",
+            CabinType.DKAUSS or CabinType.DKAUSSR => $"{cabinType?.ToCustomString()} / Doppelkabine Aussen",
+            CabinType.G2I or CabinType.G2IR => $"{cabinType?.ToCustomString()} / Doppelkabine Innen",
+            CabinType.ThreeBEAUSS or CabinType.ThreeBEAUSSR => $"{cabinType?.ToCustomString()} Dreierkabine Aussen",
+            CabinType.G3I or CabinType.G3IR => $"{cabinType?.ToCustomString()} / Dreierkabine Innen",
+            CabinType.ABEAUSS or CabinType.ABEAUSSR => $"{cabinType?.ToCustomString()} / Viererkabine Aussen",
+            CabinType.G4I or CabinType.G4IR => $"{cabinType?.ToCustomString()} / Viererkabine Innen",
+            CabinType.GDI => $"{cabinType?.ToCustomString()} / DeckPassage",
             null => null,
             _ => throw new ArgumentOutOfRangeException(nameof(cabinType), cabinType, null)
         };
