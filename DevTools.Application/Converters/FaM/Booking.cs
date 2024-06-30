@@ -126,6 +126,34 @@ public enum CabinType
     EKAUSSR
 }
 
+public static class CabinTypeExtensions
+{
+    public static string? ToCustomString(this CabinType cabinType)
+    {
+        return cabinType switch
+        {
+            CabinType.EKAUS => "EKAUS",
+            CabinType.G1I => "G1I",
+            CabinType.DKAUSS => "DKAUSS",
+            CabinType.G2I => "G2I",
+            CabinType.ThreeBEAUSS => "3BEAUSS",
+            CabinType.G3I => "G3I",
+            CabinType.ABEAUSS => "ABEAUSS",
+            CabinType.G4I => "G4I",
+            CabinType.GDI => "GDI",
+            CabinType.G1IR => "G1IR",
+            CabinType.G2IR => "G2IR",
+            CabinType.G3IR => "G3IR",
+            CabinType.G4IR => "G4IR",
+            CabinType.ThreeBEAUSSR => "3BEAUSSR",
+            CabinType.ABEAUSSR => "ABEAUSSR",
+            CabinType.DKAUSSR => "DKAUSSR",
+            CabinType.EKAUSSR => "EKAUSR",
+            _ => null
+        };
+    }
+}
+
 public enum Airport
 {
     ZRH,

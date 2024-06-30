@@ -113,12 +113,7 @@ public class MasterListParser
 
         var checkOut = room is not null && tripEndDate != room.LeistungBis
             ? room.LeistungBis!.Value
-            : outboundTravelInfo.Transport switch
-            {
-                Transport.Ferry => tripEndDate.AddDays(-1),
-                Transport.Flight or Transport.Individually => tripEndDate,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            : outboundTravelInfo.Date;
 
         var internalRemarks = participant.DistinctBy(e => e.InternalRemarks)
             .FirstOrDefault(e => e.InternalRemarks != string.Empty)
@@ -158,15 +153,18 @@ public class MasterListParser
         Participant? booker,
         bool isInBound)
     {
+        if (booker is not null)
+        {
+            return isInBound ? booker.InboundTravelInfo with { } : booker.OutboundTravelInfo with { };
+        }
+
         var cabinType = TryGetCabinType(participant, isInbound: isInBound);
 
-        var cabinReference =
-            (isInBound ? booker?.InboundTravelInfo.CabinReference : booker?.OutboundTravelInfo.CabinReference)
-            ?? participant
-                .FirstOrDefault(e => cabinType.HasValue && e.Leistungscode == cabinType.Value.ToString())
-                ?.Belegungsnr;
+        var cabinReference = participant
+            .FirstOrDefault(e => cabinType.HasValue && e.Leistungscode == cabinType.Value.ToCustomString())
+            ?.Belegungsnr;
 
-        var greekAirport = GetGreekAirport(participant, isInbound: isInBound) ?? booker?.InboundTravelInfo?.Airport;
+        var greekAirport = GetGreekAirport(participant, isInbound: isInBound);
 
         var transport = Transport.Individually;
 
@@ -178,15 +176,52 @@ public class MasterListParser
         {
             transport = Transport.Ferry;
         }
-
+        
         var travelInfo = new ParticipantTravelInformation(
             Transport: transport,
-            Date: date,
+            Date: GetTravelDate(date, isInBound, transport, participant, greekAirport),
             Airport: greekAirport,
             CabinReference: cabinReference,
             CabinType: cabinType);
 
         return travelInfo;
+    }
+
+    private static DateTime GetTravelDate(
+        DateTime date,
+        bool isInBound,
+        Transport transport,
+        IGrouping<int, MasterListRow> participant,
+        Airport? greekAirport)
+    {
+        if (transport == Transport.Individually)
+        {
+            return date;
+        }
+
+        if (greekAirport is not null)
+        {
+            return isInBound
+                ? participant
+                    .First(e => e.Leistungsart == "T-Flug" && e.Leistungscode.EndsWith(greekAirport.ToString()!))
+                    .LeistungVon!.Value
+                : participant
+                    .First(e => e.Leistungsart == "T-Flug" && e.Leistungscode.StartsWith(greekAirport.ToString()!))
+                    .LeistungVon!.Value;
+        }
+
+        if (isInBound)
+        {
+            return participant
+                .First(e => e.Leistungsart == "T-Schiff" && e.Leistungscode.EndsWith("GPA"))
+                .LeistungVon!.Value;
+        }
+
+        var outboundFerryStartDate = participant
+            .First(e => e.Leistungsart == "T-Schiff" && e.Leistungscode.EndsWith("AOI"))
+            .LeistungVon!.Value;
+
+        return outboundFerryStartDate == date ? outboundFerryStartDate.AddDays(-1) : outboundFerryStartDate;
     }
 
     private static int? GetRepeater(IGrouping<int, MasterListRow> participant)
@@ -204,7 +239,15 @@ public class MasterListParser
 
     private static CabinType? TryGetCabinType(IGrouping<int, MasterListRow> participant, bool isInbound)
     {
-        var groupedRows = participant.Where(e => e.Leistungsart == "T-Schiff" && !e.Leistungscode.Contains("-"))
+        if ((isInbound && !participant.Any(e => e.Leistungsart == "T-Schiff" && e.Leistungscode.EndsWith("GPA")))
+            || (!isInbound && !participant.Any(e => e.Leistungsart == "T-Schiff" && e.Leistungscode.EndsWith("AOI"))))
+        {
+            return null;
+        }
+        
+        var groupedRows = participant.Where(e =>
+                (e.Leistungsart == "T-Schiff" && !e.Leistungscode.Contains("-")) ||
+                (e.Leistungsart == "S-Pauschalreise" && e.Leistungscode.Contains("AUS")))
             .GroupBy(e => e.LeistungVon)
             .ToList();
 
@@ -226,44 +269,12 @@ public class MasterListParser
 
         foreach (var code in codes)
         {
-            switch (code)
+            foreach (CabinType cabinType in Enum.GetValues(typeof(CabinType)))
             {
-                case "G1I":
-                    return CabinType.G1I;
-                case "G2I":
-                    return CabinType.G2I;
-                case "G3I":
-                    return CabinType.G3I;
-                case "G4I":
-                    return CabinType.G4I;
-                case "3BEAUSS":
-                    return CabinType.ThreeBEAUSS;
-                case "ABEAUSS":
-                    return CabinType.ABEAUSS;
-                case "DKAUSS":
-                    return CabinType.DKAUSSR;
-                case "EKAUS":
-                    return CabinType.EKAUS;
-                case "GDI":
-                    return CabinType.GDI;
-                case "G1IR":
-                    return CabinType.G1IR;
-                case "G2IR":
-                    return CabinType.G2IR;
-                case "G3IR":
-                    return CabinType.G3IR;
-                case "G4IR":
-                    return CabinType.G4IR;
-                case "3BEAUSSR":
-                    return CabinType.ThreeBEAUSS;
-                case "ABEAUSSR":
-                    return CabinType.ABEAUSS;
-                case "DKAUSSR":
-                    return CabinType.DKAUSSR;
-                case "EKAUSR":
-                    return CabinType.EKAUS;
-                default:
-                    continue;
+                if (cabinType.ToCustomString() == code)
+                {
+                    return cabinType;
+                }
             }
         }
 
