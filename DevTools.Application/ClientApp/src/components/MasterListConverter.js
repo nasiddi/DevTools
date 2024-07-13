@@ -16,6 +16,10 @@ export const MasterListConverter = () => {
 				isSelected: false,
 			},
 			{
+				name: 'FerienAmMeer Ferry Vouchers',
+				isSelected: false,
+			},
+			{
 				name: 'Flight List',
 				isSelected: false,
 			},
@@ -33,7 +37,7 @@ export const MasterListConverter = () => {
 	const convert = async (e) => {
 		const fileTypes = state.filetypes
 			.filter((e) => e.isSelected)
-			.map((e) => e.name.replace(' ', ''))
+			.map((e) => e.name.replaceAll(' ', ''))
 
 		if (fileTypes.length === 0) {
 			setState({

@@ -29,7 +29,7 @@ public static class LufthansaGroupPaxConverter
             {
                 foreach (var flight in adult.Flights)
                 {
-                    var LufthansaGroupPaxList = flightsDictionary[flight];
+                    var lufthansaGroupPaxList = flightsDictionary[flight];
 
                     Person? infant = null;
                     var baby = babies.FirstOrDefault(e => e.Flights.Contains(flight));
@@ -46,7 +46,7 @@ public static class LufthansaGroupPaxConverter
                         babies.Remove(baby);
                     }
                     
-                    LufthansaGroupPaxList.Add(new LufthansaGroupPax(
+                    lufthansaGroupPaxList.Add(new LufthansaGroupPax(
                         adult.FrequentFlyerProgram,
                         adult.FrequentFlyerNumber,
                         new Person(
