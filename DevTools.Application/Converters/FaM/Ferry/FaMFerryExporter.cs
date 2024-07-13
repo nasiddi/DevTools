@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
-using OfficeOpenXml.Table;
 using ratio_list_converter.Parser;
 
 namespace DevTools.Application.Converters.FaM.Ferry;
@@ -20,14 +19,21 @@ public static class FaMFerryExporter
 
 
     public static ConvertedFile ExportFamFerryRows(IList<Booking> bookings)
-
     {
-        var inboundTravelers = bookings.SelectMany(e => e.Participants)
-            .Where(e => e.InboundTravelInfo.Transport == Transport.Ferry).GroupBy(e => e.InboundTravelInfo.Date)
-            .ToList();
-        var outboundTravelers = bookings.SelectMany(e => e.Participants)
-            .Where(e => e.OutboundTravelInfo.Transport == Transport.Ferry).GroupBy(e => e.OutboundTravelInfo.Date)
-            .ToList();
+        var inboundTravelers = bookings
+            .SelectMany(e => e.Participants.Select(p => new {Participant = p, e.BookingNumber}))
+            .Where(e => e.Participant.InboundTravelInfo.Transport == Transport.Ferry)
+            .GroupBy(e => e.Participant.InboundTravelInfo.Date)
+            .ToDictionary(g => g.Key,
+                g => g.Select(e => (Participant: e.Participant, BookingNumber: e.BookingNumber)).ToList());
+
+        var outboundTravelers = bookings
+            .SelectMany(e => e.Participants.Select(p => new {Participant = p, e.BookingNumber}))
+            .Where(e => e.Participant.OutboundTravelInfo.Transport == Transport.Ferry)
+            .GroupBy(e => e.Participant.OutboundTravelInfo.Date)
+            .ToDictionary(g => g.Key,
+                g => g.Select(e => (Participant: e.Participant, BookingNumber: e.BookingNumber)).ToList());
+
 
         using var memoryStream = new MemoryStream();
         ConvertToXlsx(inboundTravelers, outboundTravelers, memoryStream);
@@ -36,8 +42,8 @@ public static class FaMFerryExporter
     }
 
     private static void ConvertToXlsx(
-        List<IGrouping<DateTime, Participant>> inboundTravelers,
-        List<IGrouping<DateTime, Participant>> outboundTravelers,
+        Dictionary<DateTime, List<(Participant Participant, int BookingNumber)>> inboundTravelers,
+        Dictionary<DateTime, List<(Participant Participant, int BookingNumber)>> outboundTravelers,
         MemoryStream memoryStream)
 
     {
@@ -45,11 +51,13 @@ public static class FaMFerryExporter
         using var excelPackage = new ExcelPackage(fileInfo);
 
         var dates = inboundTravelers.Select(e =>
-                new KeyValuePair<DateTime, (bool IsInbound, IList<Participant> Participants)>(e.Key,
-                    (true, e.ToList())))
+                new KeyValuePair<DateTime, (bool IsInbound, IList<(Participant Participant, int BookingNumber)>
+                    Participants)>(e.Key,
+                    (true, e.Value.ToList())))
             .Union(outboundTravelers.Select(e =>
-                new KeyValuePair<DateTime, (bool IsInbound, IList<Participant> Participants)>(e.Key,
-                    (true, e.ToList()))))
+                new KeyValuePair<DateTime, (bool IsInbound, IList<(Participant Participant, int BookingNumber)>
+                    Participants)>(e.Key,
+                    (true, e.Value.ToList()))))
             .ToList();
 
         MapFerryInfo(excelPackage, dates);
@@ -66,7 +74,8 @@ public static class FaMFerryExporter
         excelPackage.SaveAs(memoryStream);
     }
 
-    private static void MapDate(KeyValuePair<DateTime, (bool IsInbound, IList<Participant> Participants)> date,
+    private static void MapDate(
+        KeyValuePair<DateTime, (bool IsInbound, IList<(Participant Participant, int BookingNumber)> Participants)> date,
         ExcelPackage excelPackage, ExcelWorksheet template)
     {
         var isInbound = date.Value.IsInbound;
@@ -82,7 +91,9 @@ public static class FaMFerryExporter
         }
 
         var cabins = date.Value.Participants.ToList().GroupBy(e =>
-            isInbound ? e.InboundTravelInfo.CabinReference : e.OutboundTravelInfo.CabinReference).ToList();
+            isInbound
+                ? e.Participant.InboundTravelInfo.CabinReference
+                : e.Participant.OutboundTravelInfo.CabinReference).ToList();
 
         var rowIndex = 1;
 
@@ -92,7 +103,6 @@ public static class FaMFerryExporter
             {
                 datedSheet.Row(rowIndex + i).Height = template.Row(i + 1).Height;
             }
-
 
             AddTitle(datedSheet, rowIndex, isInbound);
             AddIntro(datedSheet, rowIndex, isInbound);
@@ -111,7 +121,7 @@ public static class FaMFerryExporter
                 AddTableRow(datedSheet, tableContextIndex, participant, isInbound);
                 tableContextIndex++;
             }
-            
+
             datedSheet.Cells[rowIndex + TableStartRowIndex, ColumnStartIndex, rowIndex + TableStartRowIndex, 6].Style
                 .Fill
                 .PatternType = ExcelFillStyle.Solid;
@@ -129,13 +139,19 @@ public static class FaMFerryExporter
                 .Bottom.Color
                 .SetColor(Color.Black);
 
+
             rowIndex += 38;
         }
+
+        datedSheet.Column(7).Hidden = true;
     }
 
-    private static void AddTableRow(ExcelWorksheet datedSheet, int tableContextIndex, Participant participant,
+    private static void AddTableRow(ExcelWorksheet datedSheet, int tableContextIndex,
+        (Participant Participant, int BookingNumber) participantAndBookingNumber,
         bool isInbound)
     {
+        var participant = participantAndBookingNumber.Participant;
+
         datedSheet.Cells[tableContextIndex, ColumnStartIndex].Value =
             isInbound
                 ? participant.InboundTravelInfo.CabinType?.ToCustomString() ?? string.Empty
@@ -162,6 +178,7 @@ public static class FaMFerryExporter
         datedSheet.Cells[tableContextIndex, 5].Value = participant.FirstName;
         datedSheet.Cells[tableContextIndex, 6].Value = participant.DateOfBirth ?? new DateTime();
         datedSheet.Cells[tableContextIndex, 6].Style.Numberformat.Format = "dd.MM.yyyy";
+        datedSheet.Cells[tableContextIndex, 7].Value = participantAndBookingNumber.BookingNumber;
     }
 
     private static void AddTableHeader(ExcelWorksheet datedSheet, int rowIndex, int colIndex, string text)
@@ -173,10 +190,10 @@ public static class FaMFerryExporter
         ExcelWorksheet datedSheet,
         int rowIndex,
         string departurePort,
-        KeyValuePair<DateTime, (bool IsInbound, IList<Participant> Participants)> date,
+        KeyValuePair<DateTime, (bool IsInbound, IList<(Participant Participant, int BookingNumber)> Participants)> date,
         ExcelWorksheet template,
         string arrivalPort,
-        IGrouping<int?, Participant> participants)
+        IGrouping<int?, (Participant Participant, int BookingNumber)> participants)
     {
         AddHeader(datedSheet, rowIndex + 3, "Check in");
         AddLongValue(datedSheet, rowIndex + 3, "Empfohlene Einfindungszeit 2\u00bd Std. vor Abfahrt");
@@ -237,7 +254,7 @@ public static class FaMFerryExporter
             $"{date.Key:dd.MM.yyyy}{departurePort}",
             DefaultBigSize);
 
-        var carInfo = participants.FirstOrDefault(e => e.FerryInfo?.Length > 0)?.FerryInfo;
+        var carInfo = participants.Select(e => e.Participant).FirstOrDefault(e => e.FerryInfo?.Length > 0)?.FerryInfo;
 
         AddHeader(datedSheet, rowIndex + 10, "Info Fahrzeug");
         AddLongValue(datedSheet, rowIndex + 10, carInfo, DefaultBigSize);
@@ -358,7 +375,8 @@ public static class FaMFerryExporter
     }
 
     private static void MapFerryInfo(ExcelPackage excelPackage,
-        List<KeyValuePair<DateTime, (bool, IList<Participant>)>> dates)
+        List<KeyValuePair<DateTime, (bool IsInbound, IList<(Participant Participant, int BookingNumber)> Participants)>>
+            dates)
     {
         var ferryInfoSheet = excelPackage.Workbook.Worksheets[1];
 
@@ -383,7 +401,7 @@ public static class FaMFerryExporter
 
             rowIndex++;
         }
-        
+
         ferryInfoSheet.DeleteRow(emptyRow);
     }
 }
