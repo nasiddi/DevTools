@@ -34,7 +34,7 @@ public class ListConversionController : ControllerBase
         {
             return BadRequest(file);
         }
-
+        
         try
         {
             listTypes = fileTypes.Select(GetListTypes).ToImmutableList();
