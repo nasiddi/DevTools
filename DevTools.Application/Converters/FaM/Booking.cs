@@ -148,7 +148,7 @@ public static class CabinTypeExtensions
             CabinType.ThreeBEAUSSR => "3BEAUSSR",
             CabinType.ABEAUSSR => "ABEAUSSR",
             CabinType.DKAUSSR => "DKAUSSR",
-            CabinType.EKAUSSR => "EKAUSR",
+            CabinType.EKAUSSR => "EKAUSSR",
             _ => null
         };
     }
