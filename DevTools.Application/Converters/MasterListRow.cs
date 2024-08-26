@@ -187,11 +187,12 @@ public class WeirdDateTimeConverter : DefaultTypeConverter
         {
             return null;
         }
+        
+        if (DateTime.TryParseExact(text, "d-MMM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
+        {
+            return result;
+        }
 
-        CultureInfo provider = CultureInfo.InvariantCulture;
-
-        var result = DateTime.ParseExact(text, "d-MMM-yyyy", CultureInfo.InvariantCulture);
-
-        return result;
+        return null;
     }
 }
