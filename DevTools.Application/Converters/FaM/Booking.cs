@@ -33,11 +33,10 @@ public record Participant(
     Staff? Staff)
 {
     public bool IsBooker { get; private set; }
-    
+
     public void SetAsBooker()
     {
-        IsBooker = RoomType == FaM.RoomType.E44;
-        
+        IsBooker = true;
     }
 }
 

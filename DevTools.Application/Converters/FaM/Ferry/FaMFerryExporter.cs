@@ -16,27 +16,13 @@ public static class FaMFerryExporter
     private const string FontName = "Calibri";
     private const float DefaultSmallSize = 11;
     private const float DefaultBigSize = 14;
-    private const int TableStartRowIndex = 12;
+    private const int TableStartRowIndex = 13;
     private const int ColumnStartIndex = 2;
 
 
     public static ConvertedFile ExportFamFerryRows(IList<Booking> bookings)
     {
-        var inboundTravelers = bookings
-            .SelectMany(e => e.Participants.Select(p => new {Participant = p, e.BookingNumber}))
-            .Where(e => e.Participant.InboundTravelInfo.Transport == Transport.Ferry)
-            .GroupBy(e => e.Participant.InboundTravelInfo.Date)
-            .ToDictionary(g => g.Key,
-                g => g.Select(e => (Participant: e.Participant, BookingNumber: e.BookingNumber)).ToList());
-
-        var outboundTravelers = bookings
-            .SelectMany(e => e.Participants.Select(p => new {Participant = p, e.BookingNumber}))
-            .Where(e => e.Participant.OutboundTravelInfo.Transport == Transport.Ferry)
-            .GroupBy(e => e.Participant.OutboundTravelInfo.Date)
-            .ToDictionary(g => g.Key,
-                g => g.Select(e => (Participant: e.Participant, BookingNumber: e.BookingNumber)).ToList());
-
-        var ferryBookings = bookings.Select(SelectBookingNumberWithCabinReferences).OrderBy(e => e.BookingNumber)
+        var ferryBookings = bookings.Select(SelectBookingNumberWithCabinReferences).OrderBy(e => e.BookingKey)
             .Where(e => e.FerryInfos.Count > 0)
             .ToList();
 
@@ -53,7 +39,6 @@ public static class FaMFerryExporter
             .Select(e => new FerryInfo(
                 e.InboundTravelInfo.Date,
                 e.InboundTravelInfo.CabinReference,
-                e.InboundTravelInfo.CabinType!.Value,
                 e.FamilyName,
                 e.FirstName,
                 e.DateOfBirth,
@@ -65,7 +50,6 @@ public static class FaMFerryExporter
             .Select(e => new FerryInfo(
                 e.OutboundTravelInfo.Date,
                 e.OutboundTravelInfo.CabinReference,
-                e.OutboundTravelInfo.CabinType!.Value,
                 e.FamilyName,
                 e.FirstName,
                 e.DateOfBirth,
@@ -74,7 +58,7 @@ public static class FaMFerryExporter
             .ToList();
 
         return new FerryBooking(
-            booking.BookingNumber,
+            $"{booking.BookingNumber}_{booking.Participants.Single(e => e.IsBooker).FamilyName.Replace(" ", "")}",
             inboundFerryInfos.Union(outboundFerryInfos).ToList());
     }
 
@@ -93,7 +77,8 @@ public static class FaMFerryExporter
         foreach (var ferryBooking in ferryBookings)
         {
             var cabinReferences = ferryBooking.FerryInfos.Select(e => e.CabinReference);
-            var additionalPassengers = ferryBookings.Where(e => e.BookingNumber != ferryBooking.BookingNumber).SelectMany(e => e.FerryInfos)
+            var additionalPassengers = ferryBookings.Where(e => e.BookingKey != ferryBooking.BookingKey)
+                .SelectMany(e => e.FerryInfos)
                 .Where(e => cabinReferences.Contains(e.CabinReference)).ToList();
 
             MapBookings(excelPackage, ferryBooking, additionalPassengers, template);
@@ -103,16 +88,17 @@ public static class FaMFerryExporter
         excelPackage.SaveAs(memoryStream);
     }
 
-    private static void MapBookings(ExcelPackage excelPackage, FerryBooking ferryBooking, List<FerryInfo> additionalPassengers, ExcelWorksheet template)
+    private static void MapBookings(ExcelPackage excelPackage, FerryBooking ferryBooking,
+        List<FerryInfo> additionalPassengers, ExcelWorksheet template)
     {
         var passengers = ferryBooking.FerryInfos.Union(additionalPassengers).OrderByDescending(e => e.IsInbound)
             .ThenBy(e => e.CabinReference).ToList();
-        
-        var sheet = excelPackage.Workbook.Worksheets.Copy("Template", $"{ferryBooking.BookingNumber}");
+
+        var sheet = excelPackage.Workbook.Worksheets.Copy("Template", $"{ferryBooking.BookingKey}");
         var cabins = passengers.GroupBy(e => (e.IsInbound, e.CabinReference, e.Date)).ToList();
 
         var rowIndex = 1;
-       
+
         foreach (var cabin in cabins)
         {
             FormatPage(sheet, template, rowIndex);
@@ -120,16 +106,22 @@ public static class FaMFerryExporter
             var isInbound = cabin.Key.IsInbound;
             var departurePort = isInbound ? "Ancona" : "Patras";
             var arrivalPort = !isInbound ? "Ancona" : "Patras";
-            
+
+            if (rowIndex == 1)
+            {
+                sheet.Cells[1, 6].Value = $"{cabin.Key.Date:dd.MM.yyyy}{departurePort}";
+            }
+
             AddTitle(sheet, rowIndex, isInbound);
             AddIntro(sheet, rowIndex, isInbound);
             AddSummary(sheet, rowIndex, departurePort, cabin.Key.Date, template, arrivalPort, cabin);
 
-            AddTableHeader(sheet, rowIndex, ColumnStartIndex, "Cabin");
-            AddTableHeader(sheet, rowIndex, 3, "Title");
-            AddTableHeader(sheet, rowIndex, 4, "Name");
-            AddTableHeader(sheet, rowIndex, 5, "First Name");
-            AddTableHeader(sheet, rowIndex, 6, "DoB");
+            var headers = new List<string> {"Title", "Name", "First Name", "DoB"};
+
+            for (var i = 0; i < headers.Count; i++)
+            {
+                AddTableHeader(sheet, rowIndex, ColumnStartIndex + i, headers[i]);
+            }
 
             var tableContextIndex = rowIndex + TableStartRowIndex + 1;
 
@@ -158,10 +150,9 @@ public static class FaMFerryExporter
 
             sheet.Row(tableContextIndex + cabin.Count()).PageBreak = true;
             rowIndex = tableContextIndex + cabin.Count() + 1;
-            
         }
 
-        sheet.Column(7).Hidden = true;
+        sheet.Column(6).Hidden = true;
     }
 
     public static void FormatPage(ExcelWorksheet datedSheet, ExcelWorksheet template, int rowIndex)
@@ -176,8 +167,6 @@ public static class FaMFerryExporter
 
     private static void AddTableRow(ExcelWorksheet datedSheet, int tableContextIndex, FerryInfo ferryInfo)
     {
-        datedSheet.Cells[tableContextIndex, ColumnStartIndex].Value = ferryInfo.CabinType.ToCustomString() ?? string.Empty;
-
         var title = "";
 
         if (ferryInfo.DateOfBirth.HasValue)
@@ -194,12 +183,27 @@ public static class FaMFerryExporter
             };
         }
 
-        datedSheet.Cells[tableContextIndex, 3].Value = title;
-        datedSheet.Cells[tableContextIndex, 4].Value = ferryInfo.FamilyName;
-        datedSheet.Cells[tableContextIndex, 5].Value = ferryInfo.FirstName;
-        datedSheet.Cells[tableContextIndex, 6].Value = ferryInfo.DateOfBirth ?? new DateTime();
-        datedSheet.Cells[tableContextIndex, 6].Style.Numberformat.Format = "dd.MM.yyyy";
+        var values = new List<StyledEntry>
+        {
+            new(title),
+            new(ferryInfo.FamilyName),
+            new(ferryInfo.FirstName),
+            new(ferryInfo.DateOfBirth ?? new DateTime(), "dd.MM.yyyy")
+        };
+
+        for (var i = 0; i < values.Count; i++)
+        {
+            datedSheet.Cells[tableContextIndex, ColumnStartIndex + i].Value = values[i].Value;
+
+            if (values[i].NumberFormat is not null)
+            {
+                datedSheet.Cells[tableContextIndex, ColumnStartIndex + i].Style.Numberformat.Format =
+                    values[i].NumberFormat!;
+            }
+        }
     }
+
+    private record StyledEntry(object Value, string? NumberFormat = default);
 
     private static void AddTableHeader(ExcelWorksheet datedSheet, int rowIndex, int colIndex, string text)
     {
@@ -222,67 +226,73 @@ public static class FaMFerryExporter
         AddLongValue(datedSheet, rowIndex + 4,
             "Bitte packen Sie für die Nacht auf der Fähre eine separate Tasche bzw. einen separaten Koffer. Sobald die Fähre den Hafen verlassen hat, kommen Sie nicht mehr in die Tiefgarage zu Ihrem Auto.");
 
-        AddHeader(datedSheet, rowIndex + 5, $"Abfahrt {departurePort}");
-        AddValue(sheet: datedSheet, rowIndex: rowIndex + 5, colIndex: 4, content: $"{date:dd.MM.yyyy}",
-            size: DefaultBigSize, bold: true);
-        AddValueFromFerryInfo(
-            datedSheet,
-            rowIndex + 5,
-            5,
-            "DEP Time",
-            $"{date:dd.MM.yyyy}{departurePort}",
-            DefaultBigSize,
-            true,
-            template.Cells[6, 5]);
+        AddHeader(datedSheet, rowIndex + 5, "Gebuchte\nLeistungen");
+        AddLongValue(datedSheet, rowIndex + 5,
+            "In dem Fährpaket inbegriffen, ist die auf der Reisebestätigung ersichtliche Kabine.\nAuf der Fähre sind keine Mahlzeiten inbegriffen.");
 
-        AddHeader(datedSheet, rowIndex + 6, $"Ankunft {arrivalPort}");
-        AddValue(sheet: datedSheet, rowIndex: rowIndex + 6, colIndex: 4,
-            content: $"{date.AddDays(1):dd.MM.yyyy}", size: DefaultBigSize);
+        AddHeader(datedSheet, rowIndex + 6, $"Abfahrt {departurePort}");
+        AddValue(sheet: datedSheet, rowIndex: rowIndex + 6, colIndex: ColumnStartIndex + 1, content: $"{date:dd.MM.yyyy}",
+            size: DefaultBigSize, bold: true);
+        var ferryInfoKey = $"{date:dd.MM.yyyy}{departurePort}";
+
         AddValueFromFerryInfo(
             datedSheet,
             rowIndex + 6,
-            5,
-            "ARR Time",
-            $"{date:dd.MM.yyyy}{departurePort}",
+            ColumnStartIndex + 2,
+            "DEP Time",
+            ferryInfoKey,
             DefaultBigSize,
-            templateCell: template.Cells[7, 5]);
+            true,
+            template.Cells[7, 4]);
 
-        AddHeader(datedSheet, rowIndex + 7, "Ihre Fähre");
+        AddHeader(datedSheet, rowIndex + 7, $"Ankunft {arrivalPort}");
+        AddValue(sheet: datedSheet, rowIndex: rowIndex + 7, colIndex: ColumnStartIndex + 1,
+            content: $"{date.AddDays(1):dd.MM.yyyy}", size: DefaultBigSize);
         AddValueFromFerryInfo(
             datedSheet,
             rowIndex + 7,
-            4,
-            "Ferry",
-            $"{date:dd.MM.yyyy}{departurePort}",
-            DefaultBigSize);
+            ColumnStartIndex + 2,
+            "ARR Time",
+            ferryInfoKey,
+            DefaultBigSize,
+            templateCell: template.Cells[8, 4]);
 
-        AddHeader(datedSheet, rowIndex + 8, "Ref.NR. Kabine");
+        AddHeader(datedSheet, rowIndex + 8, "Ihre Fähre");
         AddValueFromFerryInfo(
             datedSheet,
             rowIndex + 8,
-            4,
-            "RefNo_Cab",
-            $"{date:dd.MM.yyyy}{departurePort}",
+            ColumnStartIndex + 1,
+            "Ferry",
+            ferryInfoKey,
             DefaultBigSize);
 
-        AddHeader(datedSheet, rowIndex + 9, "Ref.Nr. Fahrzeug");
+        AddHeader(datedSheet, rowIndex + 9, "Ref.NR. Kabine");
         AddValueFromFerryInfo(
             datedSheet,
             rowIndex + 9,
-            4,
+            ColumnStartIndex + 1,
+            "RefNo_Cab",
+            ferryInfoKey,
+            DefaultBigSize);
+
+        AddHeader(datedSheet, rowIndex + 10, "Ref.Nr. Fahrzeug");
+        AddValueFromFerryInfo(
+            datedSheet,
+            rowIndex + 10,
+            ColumnStartIndex + 1,
             "RefNo_Vehicule",
-            $"{date:dd.MM.yyyy}{departurePort}",
+            ferryInfoKey,
             DefaultBigSize);
 
         var carInfo = participants.Select(e => e.CarInfo).FirstOrDefault(e => e?.Length > 0);
 
-        AddHeader(datedSheet, rowIndex + 10, "Info Fahrzeug");
-        AddLongValue(datedSheet, rowIndex + 10, carInfo, DefaultBigSize);
+        AddHeader(datedSheet, rowIndex + 11, "Info Fahrzeug");
+        AddLongValue(datedSheet, rowIndex + 11, carInfo, DefaultBigSize);
     }
 
     private static void AddHeader(ExcelWorksheet sheet, int rowIndex, string content)
     {
-        var cell = sheet.Cells[rowIndex, ColumnStartIndex, rowIndex, 3];
+        var cell = sheet.Cells[rowIndex, ColumnStartIndex];
         cell.Value = content;
         cell.Style.Font.Name = FontName;
         cell.Style.Font.Size = DefaultSmallSize;
@@ -294,18 +304,13 @@ public static class FaMFerryExporter
     private static void MergeCells(ExcelWorksheet sheet, int rowIndex)
     {
         // LongValues
-        MergeCell(sheet, rowIndex + 3, 4, 6);
-        MergeCell(sheet, rowIndex + 4, 4, 6);
-        MergeCell(sheet, rowIndex + 10, 4, 6);
+        MergeCell(sheet, rowIndex + 3, 3, 5);
+        MergeCell(sheet, rowIndex + 4, 3, 5);
+        MergeCell(sheet, rowIndex + 5, 3, 5);
+        MergeCell(sheet, rowIndex + 11, 3, 5);
 
         // Intro
-        MergeCell(sheet, rowIndex + 2, ColumnStartIndex, 6);
-
-        // Headers
-        for (int i = 3; i <= 10; i++)
-        {
-            MergeCell(sheet, rowIndex + i, ColumnStartIndex, 3);
-        }
+        MergeCell(sheet, rowIndex + 2, ColumnStartIndex, 5);
     }
 
     private static void MergeCell(ExcelWorksheet sheet, int rowIndex, int startCol, int endCol)
@@ -316,7 +321,7 @@ public static class FaMFerryExporter
     private static void AddLongValue(ExcelWorksheet sheet, int rowIndex, string? content,
         float size = DefaultSmallSize)
     {
-        var cell = sheet.Cells[rowIndex, 4, rowIndex, 6];
+        var cell = sheet.Cells[rowIndex, 3, rowIndex, 5];
         cell.Value = content ?? string.Empty;
         cell.Style.Font.Name = FontName;
         cell.Style.Font.Size = size;
@@ -422,7 +427,8 @@ public static class FaMFerryExporter
         var table = ferryInfoSheet.Tables.First();
         var emptyRow = table.Address.End.Row;
         var rowIndex = table.Address.End.Row + 1;
-        var dates = ferryBookings.SelectMany(e => e.FerryInfos.Select(i => (i.Date, i.IsInbound))).Distinct().OrderBy(e => e.Date);
+        var dates = ferryBookings.SelectMany(e => e.FerryInfos.Select(i => (i.Date, i.IsInbound))).Distinct()
+            .OrderBy(e => e.Date);
 
         foreach (var (date, isInbound) in dates)
         {
@@ -435,7 +441,7 @@ public static class FaMFerryExporter
             ferryInfoSheet.Cells[rowIndex, 5].Value = isInbound ? "Ancona" : "Patras";
             ferryInfoSheet.Cells[rowIndex, 6].Value = date.AddDays(1);
             ferryInfoSheet.Cells[rowIndex, 8].Value = !isInbound ? "Ancona" : "Patras";
-            ferryInfoSheet.Cells[rowIndex, 11].Value = $"{date:dd.MM.yyyy}{(isInbound ? "Ancona" : "Patras")}";
+            ferryInfoSheet.Cells[rowIndex, 12].Value = $"{date:dd.MM.yyyy}{(isInbound ? "Ancona" : "Patras")}";
 
             rowIndex++;
         }
@@ -443,8 +449,8 @@ public static class FaMFerryExporter
         ferryInfoSheet.DeleteRow(emptyRow);
     }
 
-    private record FerryBooking(int BookingNumber, IList<FerryInfo> FerryInfos);
+    private record FerryBooking(string BookingKey, IList<FerryInfo> FerryInfos);
 
-    private record FerryInfo(DateTime Date, int? CabinReference, CabinType CabinType, string FamilyName,
+    private record FerryInfo(DateTime Date, int? CabinReference, string FamilyName,
         string FirstName, DateTime? DateOfBirth, string? CarInfo, bool IsInbound);
 }
