@@ -86,7 +86,7 @@ public class MasterListExporter
                     OutboundCabinType = MapCabinType(p.OutboundTravelInfo.CabinType),
                     OutboundCabinReference = p.OutboundTravelInfo.CabinReference ?? 0,
                     FerryInfo = p.FerryInfo,
-                    MealPlan = booking.MealPlan,
+                    MealPlan = p.MealPlan,
                     PhoneNumber = booking.PhoneNumber,
                     Email = booking.Email,
                     Repeater = p.Repeater

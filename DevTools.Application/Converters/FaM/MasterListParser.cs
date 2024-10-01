@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using ratio_list_converter.Parser;
 
@@ -46,6 +45,15 @@ public class MasterListParser
                      ?? participants.OrderBy(e => e.DateOfBirth).First();
 
         booker.SetAsBooker();
+        
+        if (participants.Any(e => e.MealPlan == MealPlan.AllInclusive))
+        {
+            foreach (var participant in participants.Where(e => e.MealPlan != MealPlan.AllInclusive))
+            {
+                Console.WriteLine($"{arg.Key} {participant.FirstName} {participant.FamilyName} {participant.DateOfBirth}");
+            }
+        }
+        
         var babies = GetBabies(babyRows, tripStartDate, tripEndDate, booker);
         participants.AddRange(babies);
 
@@ -55,7 +63,6 @@ public class MasterListParser
             Email: email,
             PhoneNumber: phoneNumber,
             Participants: participants.OrderBy(e => e.RoomReference).ThenBy(e => e.DateOfBirth).ToList(),
-            MealPlan: MapMealPlan(rows),
             Group: travelGroup,
             IsFamilyCombo: isFamilyCombo);
     }
@@ -138,6 +145,7 @@ public class MasterListParser
             HotelInfo: hotelInfo,
             CheckIn: checkIn,
             CheckOut: checkOut,
+            MealPlan: MapMealPlan(participant.ToList()),
             InboundTravelInfo: inboundTravelInfo,
             OutboundTravelInfo: outboundTravelInfo,
             RoomReference: booker?.RoomReference ?? roomReference ?? 0,

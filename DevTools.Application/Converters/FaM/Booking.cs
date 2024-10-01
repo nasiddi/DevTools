@@ -8,7 +8,6 @@ public record Booking(
     int? InvoiceNumber,
     string? Email,
     string? PhoneNumber,
-    MealPlan MealPlan,
     Group? Group,
     bool IsFamilyCombo,
     IReadOnlyList<Participant> Participants);
@@ -25,6 +24,7 @@ public record Participant(
     string? HotelInfo,
     DateTime CheckIn,
     DateTime CheckOut,
+    MealPlan MealPlan,
     ParticipantTravelInformation InboundTravelInfo,
     ParticipantTravelInformation OutboundTravelInfo,
     int RoomReference,
