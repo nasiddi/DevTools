@@ -146,7 +146,7 @@ public class MasterListRowClassMap : ClassMap<MasterListRow>
         Map(m => m.InfoFerry).Name("Infofaehre").Optional();
         Map(m => m.Teilnehmernr).Name("Teilnehmernr");
         Map(m => m.Zustieghinfahrt).Name("Zustieg hinfahrt");
-        Map(m => m.Ausstiegrückfahrt).Name("Ausstieg rückfahrt");
+        Map(m => m.Ausstiegrückfahrt).Name("Ausstieg r ckfahrt");
         Map(m => m.Leistungstyp).Name("Leistungstyp");
         Map(m => m.Leistungsart).Name("Leistungsart");
         Map(m => m.Leistungscode).Name("Leistungscode");
