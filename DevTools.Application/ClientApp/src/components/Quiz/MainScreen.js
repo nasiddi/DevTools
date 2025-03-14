@@ -122,7 +122,7 @@ function Question({ questionData, onNextQuestion }) {
 				<img
 					src="https://cloud.skyship.space/s/LN5eeqQ8rH5xqYs/download/logo.png"
 					alt={'logo'}
-					style={{ maxWidth: '80%', height: 'auto' }}
+					style={{ maxWidth: '30%', height: 'auto' }}
 					onClick={onNextQuestion}
 				/>
 			</Grid2>
