@@ -14,6 +14,7 @@ import { Characters } from './components/Citadels/Characters'
 import { Game } from './components/Citadels/Game'
 import { Statistics } from './components/Citadels/Statistics'
 import { MasterListConverter } from './components/MasterListConverter'
+import MainScreen from './components/Quiz/MainScreen'
 
 export default function App() {
 	return (
@@ -52,6 +53,9 @@ export default function App() {
 				<Routes>
 					<Route exact path="/file-download/:id" element={<FileDownload />} />
 					<Route exact path="/list-converter" element={<MasterListConverter />} />
+					<Route exact path="/quiz/mainscreen" element={<AuthRoute />}>
+						<Route exact path="/quiz/mainscreen" element={<MainScreen />} />
+					</Route>
 				</Routes>
 			</CleanLayout>
 		</>

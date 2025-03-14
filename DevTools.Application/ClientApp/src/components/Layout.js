@@ -2,7 +2,7 @@
 import { Container } from 'reactstrap'
 import { NavMenu } from './NavMenu'
 
-const urlsToHideTheMenu = ['/file-download', 'list-converter']
+const urlsToHideTheMenu = ['/file-download', 'list-converter', 'quiz']
 
 export const DefaultLayout = (props) => {
 	return (
@@ -26,7 +26,6 @@ export const CleanLayout = (props) => {
 					display: 'flex',
 					justifyContent: 'center',
 					alignItems: 'center',
-					paddingTop: 200,
 				}}
 			>
 				{props.children}

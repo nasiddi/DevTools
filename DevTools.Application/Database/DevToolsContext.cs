@@ -1,5 +1,6 @@
 using DevTools.Application.Models;
 using DevTools.Application.Models.Citadels;
+using DevTools.Application.Models.Quiz;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevTools.Application.Database;
@@ -20,9 +21,8 @@ public class DevToolsContext : DbContext
     public DbSet<Player> Players { get; set; }
     public DbSet<PlayerResult> PlayerResults { get; set; }
     public DbSet<Turn> Turns { get; set; }
-        
-        
-
+    public DbSet<QuizShow> QuizShows { get; set; }
+    public DbSet<Question> Questions { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.Entity<Flags>()

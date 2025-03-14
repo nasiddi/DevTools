@@ -130,7 +130,14 @@ export const MasterListConverter = () => {
 	}
 
 	return (
-		<Grid container direction="column" justifyContent="center" alignItems="center" spacing={4}>
+		<Grid
+			container
+			direction="column"
+			justifyContent="center"
+			alignItems="center"
+			spacing={4}
+			sx={{ paddingTop: '200px' }}
+		>
 			<Grid item xs={12}>
 				<input
 					id="contained-button-file"
