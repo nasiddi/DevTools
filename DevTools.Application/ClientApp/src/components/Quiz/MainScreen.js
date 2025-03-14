@@ -37,6 +37,8 @@ export function QuestionList({ currentIndex, questions }) {
 						sx={{
 							display: 'flex',
 							alignItems: 'center',
+							paddingTop: '4px',
+							paddingBottom: '4px',
 							backgroundColor:
 								question.index === currentIndex ? 'orange' : 'transparent',
 						}}
