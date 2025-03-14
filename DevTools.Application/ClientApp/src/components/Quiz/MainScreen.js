@@ -42,7 +42,7 @@ export function QuestionList({ currentIndex, questions }) {
 						}}
 					>
 						<Typography
-							sx={{ fontFamily: 'Verdana, Arial, sans-serif', fontSize: '1.5rem' }}
+							sx={{ fontFamily: 'Verdana, Arial, sans-serif', fontSize: '2rem' }}
 							variant="h6"
 							style={{ width: `${maxIndexWidth}px`, textAlign: 'left' }}
 						>
@@ -54,7 +54,7 @@ export function QuestionList({ currentIndex, questions }) {
 							<div style={{ width: '24px', marginRight: '8px' }} />
 						)}
 						<Typography
-							sx={{ fontFamily: 'Verdana, Arial, sans-serif', fontSize: '1.5rem' }}
+							sx={{ fontFamily: 'Verdana, Arial, sans-serif', fontSize: '2rem' }}
 							variant="h6"
 							style={{ width: `${maxAmountWidth}px`, textAlign: 'left' }}
 						>
@@ -137,7 +137,7 @@ function Question({ questionData, onNextQuestion }) {
 						padding: '20px', // Optionally add padding for better appearance
 						color: 'white', // Ensure text is readable on primary background
 						boxSizing: 'border-box',
-						fontSize: '1.8rem',
+						fontSize: '2.2rem',
 					}}
 				>
 					{question.questionText}
@@ -152,7 +152,7 @@ function Question({ questionData, onNextQuestion }) {
 						sx={{
 							fontFamily: 'Verdana, Arial, sans-serif',
 							width: '100%',
-							fontSize: '1.5rem',
+							fontSize: '2rem',
 						}}
 						onClick={() => onClickAnswer(answer)}
 					>
