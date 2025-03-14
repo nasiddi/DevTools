@@ -17,15 +17,15 @@ function shuffleArray(array) {
 }
 
 export function QuestionList({ currentIndex, questions }) {
-	const maxIndexWidth = Math.max(...questions.map((q) => `${q.index}`.length)) * 15 // Adjust multiplier as needed
-	const maxAmountWidth = Math.max(...questions.map((q) => `CHF ${q.amount}`.length)) * 15 // Adjust multiplier as needed
+	const maxIndexWidth = Math.max(...questions.map((q) => `${q.index}`.length)) * 20 // Adjust multiplier as needed
+	const maxAmountWidth = Math.max(...questions.map((q) => `CHF ${q.amount}`.length)) * 20 // Adjust multiplier as needed
 
 	return (
 		<List
 			sx={{
 				paddingLeft: '200px',
 				paddingRight: '200px',
-				paddingTop: '100px',
+				paddingTop: '50px',
 				boxSizing: 'border-box',
 			}}
 		>
