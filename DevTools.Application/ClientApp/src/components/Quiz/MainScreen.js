@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Button, Grid, List, ListItem, Typography } from '@mui/material'
+import { Box, Button, Chip, Grid, List, ListItem, Typography } from '@mui/material'
 import TaskAltIcon from '@mui/icons-material/TaskAlt'
-import { get, post } from '../../BackendClient'
+import { get } from '../../BackendClient'
 import Grid2 from '@mui/material/Unstable_Grid2'
+import RuleIcon from '@mui/icons-material/Rule'
+import PhoneEnabledIcon from '@mui/icons-material/PhoneEnabled'
+import GroupsIcon from '@mui/icons-material/Groups'
 
-function shuffleArray(array) {
-	for (let i = array.length - 1; i > 0; i--) {
-		// Generate a random index between 0 and i
-		const j = Math.floor(Math.random() * (i + 1))
+export const letters = ['A', 'B', 'C', 'D']
 
-		// Swap elements at index i and j
-		;[array[i], array[j]] = [array[j], array[i]]
-	}
-
-	return array
+export const jokerIcons = {
+	half: <RuleIcon sx={{ fontSize: '4rem' }} />,
+	phone: <PhoneEnabledIcon sx={{ fontSize: '4rem' }} />,
+	poll: <GroupsIcon sx={{ fontSize: '4rem' }} />,
 }
 
 export function QuestionList({ currentIndex, questions }) {
@@ -44,17 +43,23 @@ export function QuestionList({ currentIndex, questions }) {
 						}}
 					>
 						<Typography
-							sx={{ fontFamily: 'Verdana, Arial, sans-serif', fontSize: '2rem' }}
+							sx={{
+								fontFamily: 'Verdana, Arial, sans-serif',
+								fontSize: '2rem',
+								width: `${maxIndexWidth}px`,
+								textAlign: 'right', // Align text to the right
+							}}
 							variant="h6"
-							style={{ width: `${maxIndexWidth}px`, textAlign: 'left' }}
 						>
 							{question.index}
 						</Typography>
-						{currentIndex > question.index ? (
-							<TaskAltIcon style={{ width: '24px', marginRight: '8px' }} />
-						) : (
-							<div style={{ width: '24px', marginRight: '8px' }} />
-						)}
+						<TaskAltIcon
+							sx={{
+								fontSize: '2rem',
+								margin: '0 16px',
+								visibility: currentIndex > question.index ? 'visible' : 'hidden',
+							}}
+						/>
 						<Typography
 							sx={{ fontFamily: 'Verdana, Arial, sans-serif', fontSize: '2rem' }}
 							variant="h6"
@@ -68,47 +73,31 @@ export function QuestionList({ currentIndex, questions }) {
 	)
 }
 
-function Question({ questionData, onNextQuestion }) {
-	const [question, setQuestion] = useState(() => {
-		const shuffledAnswers = shuffleArray(questionData.answers)
-
-		return { ...questionData, answers: shuffledAnswers }
-	})
+function Question({ halfJokerIsActive, questionData }) {
+	const [question, setQuestion] = useState(questionData)
 
 	useEffect(() => {
-		const shuffledAnswers = shuffleArray(questionData.answers)
-		setQuestion({ ...questionData, answers: shuffledAnswers })
+		setQuestion(questionData)
 	}, [questionData])
 
-	async function onClickAnswer(answer) {
-		if (question.answers.some((e) => e.isLockedIn)) {
-			return
-		}
-
-		const currentData = JSON.parse(JSON.stringify(question))
-
-		currentData.answers.forEach((a) => {
-			if (a.isSelectedByContestant && a.answerText === answer.answerText) {
-				a.isLockedIn = true
-			} else a.isSelectedByContestant = a.answerText === answer.answerText
-		})
-
-		setQuestion(currentData)
-
-		if (currentData.answers.some((e) => e.isLockedIn)) {
-			return
-		}
-
-		const selectedAnswer = currentData.answers.find((answer) => answer.isSelectedByContestant)
-		await post(`quiz/answers/${selectedAnswer.id}/current`)
-	}
-
 	function getButtonColor(answer) {
-		if (answer.isLockedIn) {
-			return answer.isCorrect ? 'success' : 'error'
+		let color = 'primary'
+
+		if (answer.isSelectedByContestant) {
+			color = 'warning'
 		}
 
-		return answer.isSelectedByContestant ? 'warning' : 'primary'
+		if (question.isLockedIn) {
+			if (answer.isSelectedByContestant) {
+				color = 'error'
+			}
+
+			if (answer.isCorrect) {
+				color = 'success'
+			}
+		}
+
+		return color
 	}
 
 	return (
@@ -125,7 +114,6 @@ function Question({ questionData, onNextQuestion }) {
 					src="https://cloud.skyship.space/s/LN5eeqQ8rH5xqYs/download/logo.png"
 					alt={'logo'}
 					style={{ maxWidth: '80%', height: 'auto' }}
-					onClick={onNextQuestion}
 				/>
 			</Grid2>
 			<Grid item xs={12}>
@@ -145,20 +133,31 @@ function Question({ questionData, onNextQuestion }) {
 					{question.questionText}
 				</Typography>
 			</Grid>
-			{question.answers.map((answer) => (
+			{question.answers.map((answer, index) => (
 				<Grid item xs={6} key={answer.answerText}>
 					<Button
 						variant="contained"
 						color={getButtonColor(answer)}
-						fullwidth
+						disabled={!halfJokerIsActive ? false : !answer.isInHalfJoker}
+						fullWidth
 						sx={{
 							fontFamily: 'Verdana, Arial, sans-serif',
 							width: '100%',
 							fontSize: '2rem',
+							display: 'flex',
+							justifyContent: 'center',
+							alignItems: 'center',
+							padding: '0 16px', // Add padding for better spacing
 						}}
-						onClick={() => onClickAnswer(answer)}
 					>
-						{answer.answerText}
+						<span style={{ marginRight: 'auto', fontWeight: 'bold' }}>
+							{letters[index]}:
+						</span>{' '}
+						{/* Align 'A:' to the left */}
+						<div style={{ flexGrow: 1, textAlign: 'center' }}>
+							{answer.answerText}
+						</div>{' '}
+						{/* Keep answer text centered */}
 					</Button>
 				</Grid>
 			))}
@@ -166,98 +165,118 @@ function Question({ questionData, onNextQuestion }) {
 	)
 }
 
-function JokerList() {
+function renderChip(joker) {
+	return (
+		<Chip
+			key={joker.jokerType}
+			color={!joker.questionIndex ? 'primary' : 'default'}
+			icon={jokerIcons[joker.jokerType.toLowerCase()]}
+			sx={{
+				width: '200px', // Increase width
+				height: '120px', // Increase height
+				fontSize: '4rem', // Increase font size
+				borderRadius: '60px', // Make chip oval
+				margin: '100px',
+			}}
+		/>
+	)
+}
+
+function JokerList({ jokers }) {
 	return (
 		<Box
 			sx={{
-				height: '100vh', // Fill the vertical space
-				width: '100vw', // Fill the horizontal space
-				display: 'flex', // Optional: Use flexbox for content alignment
-				justifyContent: 'center', // Center content horizontally
-				alignItems: 'center', // Center content vertically
+				display: 'flex', // Use flexbox for layout
+				flexDirection: 'column', // Arrange children in a column
+				justifyContent: 'center', // Center content vertically
+				alignItems: 'center', // Center content horizontally
+				height: '1080px', // Optional: Full viewport height for centering
 			}}
 		>
-			{/* Content inside the Box */}
-			<h1>Centered Content</h1>
+			{jokers.map((joker) => renderChip(joker))}
 		</Box>
 	)
 }
 
 function MainScreen() {
-	const [questions, setQuestions] = useState([])
-	const [currentIndex, setCurrentIndex] = useState(1)
+	const [quizShow, setQuizShow] = useState(undefined)
 
 	useEffect(() => {
-		document.body.style.overflow = 'hidden'
 		document.body.style.backgroundColor = 'lightblue'
-
-		async function load() {
-			const data = await fetchQuestions()
-			const quizShow = await fetchQuizShow()
-			setQuestions(data)
-			setCurrentIndex(quizShow.questionIndex)
-		}
-
-		load().then()
-
-		return () => {
-			document.body.style.overflow = '' // Cleanup on unmount
-		}
 	}, [])
 
-	async function fetchQuestions() {
-		return await get('quiz/questions')
-			.then((r) => r.json())
-			.then((j) => {
-				return j
-			})
-	}
+	useEffect(() => {
+		const intervalId = setInterval(async () => {
+			try {
+				const fetchedQuizShow = await fetchQuizShow()
+				setQuizShow(fetchedQuizShow)
+			} catch (error) {
+				console.error('Error fetching quiz show:', error)
+			}
+		}, 200)
+
+		// Cleanup the interval on component unmount
+		return () => clearInterval(intervalId)
+	}, [])
 
 	async function fetchQuizShow() {
-		return await get('quiz/questions/current')
+		return await get('quiz')
 			.then((r) => r.json())
 			.then((j) => {
 				return j
 			})
 	}
 
-	async function onNextQuestion() {
-		setCurrentIndex(currentIndex + 1)
-		await post(`quiz/questions/current?questionIndex=${currentIndex + 1}`)
-	}
-
-	if (questions.length === 0) {
+	if (!quizShow) {
 		return <></>
 	}
 
 	return (
 		<Box
 			sx={{
-				display: 'flex', // Use flexbox for layout
-				width: '100vw', // Ensure full viewport width
-				height: '100vh', // Full viewport height
+				display: 'flex', // Use flexbox layout
+				width: '5760px', // Ensure full viewport width
+				height: '1080px', // Full viewport height
 			}}
 		>
 			<Box
 				sx={{
-					flex: 1, // Takes up one-third of the horizontal space
+					width: '960px', // Set width to 1920px
+					border: '1px solid black',
 				}}
 			>
-				<QuestionList currentIndex={currentIndex} questions={questions} />
-			</Box>
-			<Box
-				sx={{
-					flex: 1, // Takes up one-third of the horizontal space
-				}}
-			>
-				<Question
-					questionData={questions.find((question) => question.index === currentIndex)}
-					onNextQuestion={onNextQuestion}
+				<QuestionList
+					currentIndex={quizShow.questionIndex}
+					questions={quizShow.questions}
 				/>
 			</Box>
 			<Box
 				sx={{
-					flex: 1, // Takes up one-third of the horizontal space
+					width: '960px', // Ensure the width is specified in pixels
+					border: '1px solid black', // Add a black border
+				}}
+			>
+				<JokerList jokers={quizShow.jokers} />
+			</Box>
+			<Box
+				sx={{
+					width: '1920px', // Set width to 1920px
+					border: '1px solid black',
+				}}
+			>
+				<Question
+					questionData={quizShow.questions.find(
+						(question) => question.index === quizShow.questionIndex
+					)}
+					halfJokerIsActive={quizShow.jokers.some(
+						(e) => e.questionIndex === quizShow.questionIndex
+					)}
+				/>
+			</Box>
+			<Box
+				sx={{
+					width: '1920px', // Set width to 1920px
+					border: '1px solid black',
 				}}
 			/>
 		</Box>

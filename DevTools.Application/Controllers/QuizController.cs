@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using DevTools.Application.Database;
-using DevTools.Application.Services;
+using DevTools.Application.Models.Quiz;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DevTools.Application.Controllers;
 
@@ -13,83 +11,110 @@ namespace DevTools.Application.Controllers;
 [Route("[controller]")]
 public class QuizController : ControllerBase
 {
-    private readonly IFileService _fileService;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly DevToolsContext _dbContext;
 
-    public QuizController(IFileService fileService, IServiceScopeFactory serviceScopeFactory)
+    public QuizController(DevToolsContext dbContext)
     {
-        _fileService = fileService;
-        _serviceScopeFactory = serviceScopeFactory;
-    }
-    
-    [HttpGet]
-    [Route("{guid}/meta-info")]
-    public IActionResult GetFileMetaInfo([FromRoute] string guid)
-    {
-        return Ok(_fileService.GetFileMetaInfo(guid));
-    }
-
-    [HttpPost]
-    [ApiKey(true)]
-    public async Task<IActionResult> ImportFile()
-    {
-        var files = Request.Form.Files.ToList();
-        var results = await _fileService.UploadFiles(files);
-        return Ok(results);
-    }
-
-    [HttpGet]
-    [Route("meta-info")]
-    public async Task<IActionResult> GetAllMetaInfos()
-    {
-        var fileMetaInfos = await _fileService.GetFileMetaInfos();
-        return Ok(fileMetaInfos);
-    }
-
-    [HttpPost]
-    [Route("{guid}/remove")]
-
-    public async Task<IActionResult> RemoveFile(string guid)
-    {
-        await _fileService.RemoveFile(guid);
-        return Ok();
+        _dbContext = dbContext;
     }
     
     [HttpGet]
     [Route("questions")]
     public async Task<IActionResult> GetQuestions()
     {
-        var dbContext = _serviceScopeFactory.CreateScope().ServiceProvider
-            .GetRequiredService<DevToolsContext>();
 
-        var questions = await dbContext.Questions.Include(e => e.Answers).ToListAsync();
+        var quizShow = await GetActiveQuizShow()
+            .AsNoTracking()
+            .Where(e => e.IsActive)
+            .Include(e => e.Questions)
+            .ThenInclude(e => e.Answers)
+            .SingleAsync();
+        
+        foreach (var question in quizShow.Questions)
+        {
+            question.ShuffleAnswers();
+        }
 
-        return Ok(questions);
+        return Ok(quizShow.Questions);
     }
     
     [HttpGet]
-    [Route("questions/current")]
-    public async Task<IActionResult> GetCurrentQuestionIndex()
+    public async Task<IActionResult> GetQuizShow()
     {
-        var dbContext = _serviceScopeFactory.CreateScope().ServiceProvider
-            .GetRequiredService<DevToolsContext>();
-
-        var quizShow = await dbContext.QuizShows.SingleAsync();
+        var quizShow = await GetActiveQuizShow()
+            .AsNoTracking()
+            .Include(e => e.Jokers)
+            .Include(e => e.Questions)
+            .ThenInclude(e => e.Answers)
+            .SingleAsync();
+        
+        foreach (var question in quizShow.Questions)
+        {
+            question.ShuffleAnswers();
+        }
 
         return Ok(quizShow);
+    }
+    
+    [HttpPost]
+    [Route("reset")]
+    public async Task<IActionResult> ResetQuizShow()
+    {
+       
+        var quizShow = await GetActiveQuizShow()
+            .Include(e => e.Jokers)
+            .Include(e => e.Questions)
+            .ThenInclude(e => e.Answers)
+            .SingleAsync();
+
+        quizShow.QuestionIndex = 1;
+        
+        foreach (var question in quizShow.Questions)
+        {
+            question.IsLockedIn = false;
+            foreach (var answer in question.Answers)
+            {
+                answer.IsSelectedByContestant = false;
+            }
+        }
+        
+        foreach (var joker in quizShow.Jokers)
+        {
+            joker.QuestionIndex = null;
+        }
+
+        await _dbContext.SaveChangesAsync();
+        return Ok();
     }
     
     [HttpPost]
     [Route("questions/current")]
     public async Task<IActionResult> SetCurrentQuestionIndex([FromQuery]int questionIndex)
     {
-        var dbContext = _serviceScopeFactory.CreateScope().ServiceProvider
-            .GetRequiredService<DevToolsContext>();
-
-        var quizShow = await dbContext.QuizShows.SingleAsync();
+        
+        var quizShow = await GetActiveQuizShow().SingleAsync();
         
         quizShow.QuestionIndex = questionIndex;
-        await dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
+        return Ok();
+    }
+    
+    [HttpPost]
+    [Route("questions/current/locked-in")]
+    public async Task<IActionResult> LockInAnswer()
+    {
+       
+        var quizShow = await GetActiveQuizShow()
+            .Include(e => e.Questions)
+            .SingleAsync();
+
+        
+        foreach (var question in quizShow.Questions)
+        {
+            question.IsLockedIn = question.Index == quizShow.QuestionIndex;
+        }
+
+        await _dbContext.SaveChangesAsync();
         return Ok();
     }
     
@@ -97,14 +122,12 @@ public class QuizController : ControllerBase
     [Route("answers/{id}/current")]
     public async Task<IActionResult> SetCurrentAnswer([FromRoute] int id)
     {
-        var dbContext = _serviceScopeFactory.CreateScope().ServiceProvider
-            .GetRequiredService<DevToolsContext>();
+        var quizShow = await GetActiveQuizShow()
+            .Include(e => e.Questions)
+            .ThenInclude(e => e.Answers)
+            .SingleAsync();
 
-        var questions = await dbContext.Questions
-            .Include(e => e.Answers)
-            .ToListAsync();
-
-        foreach (var question in questions)
+        foreach (var question in quizShow.Questions)
         {
             foreach (var answer in question.Answers)
             {
@@ -112,7 +135,28 @@ public class QuizController : ControllerBase
             }
         }
 
-        await dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
         return Ok();
+    }
+    
+    [HttpPost]
+    [Route("jokers/{id}/use")]
+    public async Task<IActionResult> UseJoker([FromRoute] int id)
+    {
+        var quizShow = await GetActiveQuizShow()
+            .Include(e => e.Jokers)
+            .SingleAsync();
+
+        var joker = quizShow.Jokers.Single(e => e.Id == id);
+        joker.QuestionIndex = quizShow.QuestionIndex;
+
+        await _dbContext.SaveChangesAsync();
+        return Ok();
+    }
+
+    private IQueryable<QuizShow> GetActiveQuizShow()
+    {
+        return _dbContext.QuizShows
+            .Where(e => e.IsActive);
     }
 }

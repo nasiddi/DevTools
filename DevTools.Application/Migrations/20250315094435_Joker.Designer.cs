@@ -4,14 +4,16 @@ using DevTools.Application.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DevTools.Application.Migrations
 {
     [DbContext(typeof(DevToolsContext))]
-    partial class DevToolsContextModelSnapshot : ModelSnapshot
+    [Migration("20250315094435_Joker")]
+    partial class Joker
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,9 +249,6 @@ namespace DevTools.Application.Migrations
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsInHalfJoker")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsSelectedByContestant")
                         .HasColumnType("bit");
 
@@ -270,13 +269,13 @@ namespace DevTools.Application.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
                     b.Property<string>("JokerType")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
-
-                    b.Property<int?>("QuestionIndex")
-                        .HasColumnType("int");
 
                     b.Property<int>("QuizShowId")
                         .HasColumnType("int");
@@ -318,7 +317,7 @@ namespace DevTools.Application.Migrations
 
                     b.HasIndex("QuizShowId");
 
-                    b.ToTable("Question");
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("DevTools.Application.Models.Quiz.QuizShow", b =>

@@ -4,14 +4,16 @@ using DevTools.Application.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DevTools.Application.Migrations
 {
     [DbContext(typeof(DevToolsContext))]
-    partial class DevToolsContextModelSnapshot : ModelSnapshot
+    [Migration("20250315075446_QuizShowId")]
+    partial class QuizShowId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,9 +249,6 @@ namespace DevTools.Application.Migrations
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsInHalfJoker")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsSelectedByContestant")
                         .HasColumnType("bit");
 
@@ -261,31 +260,6 @@ namespace DevTools.Application.Migrations
                     b.HasIndex("QuestionId");
 
                     b.ToTable("Answer");
-                });
-
-            modelBuilder.Entity("DevTools.Application.Models.Quiz.Joker", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("JokerType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int?>("QuestionIndex")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuizShowId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("QuizShowId");
-
-                    b.ToTable("Joker");
                 });
 
             modelBuilder.Entity("DevTools.Application.Models.Quiz.Question", b =>
@@ -318,7 +292,7 @@ namespace DevTools.Application.Migrations
 
                     b.HasIndex("QuizShowId");
 
-                    b.ToTable("Question");
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("DevTools.Application.Models.Quiz.QuizShow", b =>
@@ -327,9 +301,6 @@ namespace DevTools.Application.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<int>("QuestionIndex")
                         .HasColumnType("int");
@@ -425,15 +396,6 @@ namespace DevTools.Application.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DevTools.Application.Models.Quiz.Joker", b =>
-                {
-                    b.HasOne("DevTools.Application.Models.Quiz.QuizShow", null)
-                        .WithMany("Jokers")
-                        .HasForeignKey("QuizShowId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("DevTools.Application.Models.Quiz.Question", b =>
                 {
                     b.HasOne("DevTools.Application.Models.Quiz.QuizShow", null)
@@ -469,8 +431,6 @@ namespace DevTools.Application.Migrations
 
             modelBuilder.Entity("DevTools.Application.Models.Quiz.QuizShow", b =>
                 {
-                    b.Navigation("Jokers");
-
                     b.Navigation("Questions");
                 });
 #pragma warning restore 612, 618

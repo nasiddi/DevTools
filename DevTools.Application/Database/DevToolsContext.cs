@@ -1,7 +1,9 @@
+using System;
 using DevTools.Application.Models;
 using DevTools.Application.Models.Citadels;
 using DevTools.Application.Models.Quiz;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DevTools.Application.Database;
 
@@ -22,7 +24,6 @@ public class DevToolsContext : DbContext
     public DbSet<PlayerResult> PlayerResults { get; set; }
     public DbSet<Turn> Turns { get; set; }
     public DbSet<QuizShow> QuizShows { get; set; }
-    public DbSet<Question> Questions { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.Entity<Flags>()
@@ -51,5 +52,14 @@ public class DevToolsContext : DbContext
             .HasOne(x => x.Game)
             .WithMany(x => x.Hands)
             .HasForeignKey(x => x.GameId);
+        
+        var converter = new ValueConverter<JokerType, string>(
+            v => v.ToString(),
+            v => (JokerType)Enum.Parse(typeof(JokerType), v));
+
+        builder.Entity<Joker>()
+            .Property(e => e.JokerType)
+            .HasMaxLength(20)
+            .HasConversion(converter);
     }
 }

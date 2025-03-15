@@ -4,14 +4,16 @@ using DevTools.Application.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DevTools.Application.Migrations
 {
     [DbContext(typeof(DevToolsContext))]
-    partial class DevToolsContextModelSnapshot : ModelSnapshot
+    [Migration("20250315094805_JokerQuestionIndex")]
+    partial class JokerQuestionIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,9 +249,6 @@ namespace DevTools.Application.Migrations
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsInHalfJoker")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsSelectedByContestant")
                         .HasColumnType("bit");
 
@@ -318,7 +317,7 @@ namespace DevTools.Application.Migrations
 
                     b.HasIndex("QuizShowId");
 
-                    b.ToTable("Question");
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("DevTools.Application.Models.Quiz.QuizShow", b =>
