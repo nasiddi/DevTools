@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Box, Button, CircularProgress, Grid, TextField, Typography } from '@mui/material'
+import {
+	Alert,
+	Box,
+	Button,
+	CircularProgress,
+	Grid,
+	LinearProgress,
+	TextField,
+	Typography,
+} from '@mui/material'
 import { get, post } from '../../BackendClient'
 import { jokerIcons, letters } from './MainScreen'
+import { GetTeamAnswers } from './HelperFunctions'
 
 function generateGUID() {
 	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -12,7 +22,57 @@ function generateGUID() {
 	})
 }
 
-function Question({ halfJokerIsActive, question, team, canSubmitAnswer }) {
+function AnswerButton({ buttonColor, answer, isDisabled, onClickAnswer, index, pollResult }) {
+	return (
+		<Grid
+			container
+			direction="column"
+			spacing={0}
+			sx={{
+				justifyContent: 'center',
+				alignItems: 'center',
+				width: '100%',
+			}}
+		>
+			<Grid item xs={12} sx={{ width: '100%', paddingBottom: '10px' }}>
+				<Button
+					variant="contained"
+					color={buttonColor(answer)}
+					disabled={isDisabled(answer)}
+					fullWidth
+					sx={{
+						fontFamily: 'Verdana, Arial, sans-serif',
+						width: '100%',
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'center',
+					}}
+					onClick={() => onClickAnswer(answer)}
+				>
+					<span style={{ marginRight: 'auto', fontWeight: 'bold' }}>
+						{letters[index]}:
+					</span>{' '}
+					{/* Align 'A:' to the left */}
+					<div style={{ flexGrow: 1, textAlign: 'center' }}>{answer.answerText}</div>{' '}
+					{/* Keep answer text centered */}
+				</Button>
+			</Grid>
+			<Grid
+				item
+				xs={12}
+				sx={{ width: '100%', visibility: !!pollResult ? 'visible' : 'hidden' }}
+			>
+				<LinearProgress
+					color={pollResult?.isWinner ? 'warning' : 'inherit'}
+					variant="determinate"
+					value={pollResult?.percent || 0}
+				/>
+			</Grid>
+		</Grid>
+	)
+}
+
+function Question({ halfJokerIsActive, question, team, canSubmitAnswer, teamAnswers }) {
 	if (!question) {
 		return <></>
 	}
@@ -99,29 +159,14 @@ function Question({ halfJokerIsActive, question, team, canSubmitAnswer }) {
 			</Grid>
 			{question.answers.map((answer, index) => (
 				<Grid item xs={12} key={answer.answerText}>
-					<Button
-						variant="contained"
-						color={getButtonColor(answer)}
-						disabled={getDisabled(answer)}
-						fullWidth
-						sx={{
-							fontFamily: 'Verdana, Arial, sans-serif',
-							width: '100%',
-							display: 'flex',
-							justifyContent: 'center',
-							alignItems: 'center',
-						}}
-						onClick={() => onClickAnswer(answer)}
-					>
-						<span style={{ marginRight: 'auto', fontWeight: 'bold' }}>
-							{letters[index]}:
-						</span>{' '}
-						{/* Align 'A:' to the left */}
-						<div style={{ flexGrow: 1, textAlign: 'center' }}>
-							{answer.answerText}
-						</div>{' '}
-						{/* Keep answer text centered */}
-					</Button>
+					<AnswerButton
+						buttonColor={getButtonColor}
+						answer={answer}
+						isDisabled={getDisabled}
+						onClickAnswer={onClickAnswer}
+						index={index}
+						pollResult={!!teamAnswers && teamAnswers[answer.id]}
+					/>
 				</Grid>
 			))}
 			<Grid
@@ -299,15 +344,19 @@ function TeamScreenInner({ teamId }) {
 				return
 			}
 
+			const hasPollJoker = team.jokers.some(
+				(e) => e.questionIndex === quizShow.questionIndex && e.jokerType === 'Poll'
+			)
+
 			const now = new Date()
 			const startTime = new Date(quizShow.questionStartTime)
-			const targetTime = new Date(startTime.getTime() + 60 * 1000)
+			const targetTime = new Date(startTime.getTime() + (hasPollJoker ? 90 : 60) * 1000)
 			const seconds = (targetTime - now) / 1000
 			setSecondsRemaining(seconds)
 		}, 200)
 
 		return () => clearInterval(interval)
-	}, [quizShow?.questionStartTime])
+	}, [quizShow])
 
 	useEffect(() => {
 		const intervalId = setInterval(async () => {
@@ -341,6 +390,8 @@ function TeamScreenInner({ teamId }) {
 		return <></>
 	}
 
+	const team = quizShow.teams.find((team) => team.teamId === teamId)
+
 	function getProcessColor() {
 		if (secondsRemaining <= 10) {
 			return 'error'
@@ -353,12 +404,20 @@ function TeamScreenInner({ teamId }) {
 		return 'primary'
 	}
 
-	const team = quizShow.teams.find((team) => team.teamId === teamId)
 	const teamAnswer = team.answers.find(
 		(answer) => answer.questionIndex === quizShow.questionIndex
 	)
 
-	const canSubmitAnswer = secondsRemaining > 0 && !teamAnswer
+	const hasPollJoker = team.jokers.some(
+		(e) => e.questionIndex === quizShow.questionIndex && e.jokerType === 'Poll'
+	)
+
+	const canSubmitAnswer =
+		secondsRemaining > 0 && !teamAnswer && (!hasPollJoker || secondsRemaining <= 30)
+
+	const teamAnswers = secondsRemaining <= 30 && hasPollJoker && GetTeamAnswers(quizShow)
+
+	const isWaitForPollResults = hasPollJoker && secondsRemaining > 30
 
 	return (
 		<Grid
@@ -435,18 +494,30 @@ function TeamScreenInner({ teamId }) {
 					/>
 				)}
 			</Grid>
-			<Grid item xs={12}>
-				<Question
-					halfJokerIsActive={team.jokers.some(
-						(e) => e.questionIndex === quizShow.questionIndex && e.jokerType === 'Half'
-					)}
-					question={quizShow.questions.find(
-						(question) => question.index === quizShow.questionIndex
-					)}
-					canSubmitAnswer={canSubmitAnswer}
-					team={team}
-				/>
-			</Grid>
+			{isWaitForPollResults && (
+				<Grid item xs={12}>
+					<Alert severity="info">
+						Publikumsantworten sind in {Math.floor(secondsRemaining) - 30} Sekunden
+						verfügbar
+					</Alert>
+				</Grid>
+			)}
+			{!isWaitForPollResults && (
+				<Grid item xs={12}>
+					<Question
+						halfJokerIsActive={team.jokers.some(
+							(e) =>
+								e.questionIndex === quizShow.questionIndex && e.jokerType === 'Half'
+						)}
+						question={quizShow.questions.find(
+							(question) => question.index === quizShow.questionIndex
+						)}
+						canSubmitAnswer={canSubmitAnswer}
+						team={team}
+						teamAnswers={teamAnswers}
+					/>
+				</Grid>
+			)}
 		</Grid>
 	)
 }
