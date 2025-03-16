@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Button, Chip, Grid, List, ListItem, Typography } from '@mui/material'
+import { Box, Button, Chip, Grid, LinearProgress, List, ListItem, Typography } from '@mui/material'
 import TaskAltIcon from '@mui/icons-material/TaskAlt'
 import { get } from '../../BackendClient'
-import Grid2 from '@mui/material/Unstable_Grid2'
 import RuleIcon from '@mui/icons-material/Rule'
 import PhoneEnabledIcon from '@mui/icons-material/PhoneEnabled'
 import GroupsIcon from '@mui/icons-material/Groups'
 
 export const letters = ['A', 'B', 'C', 'D']
 
-export const jokerIcons = {
-	half: <RuleIcon sx={{ fontSize: '4rem' }} />,
-	phone: <PhoneEnabledIcon sx={{ fontSize: '4rem' }} />,
-	poll: <GroupsIcon sx={{ fontSize: '4rem' }} />,
-}
+export const jokerIcons = (rem) => ({
+	half: <RuleIcon sx={{ fontSize: `${rem}rem` }} />,
+	phone: <PhoneEnabledIcon sx={{ fontSize: `${rem}rem` }} />,
+	poll: <GroupsIcon sx={{ fontSize: `${rem}rem` }} />,
+})
 
 export function QuestionList({ currentIndex, questions }) {
 	const maxIndexWidth = Math.max(...questions.map((q) => `${q.index}`.length)) * 20 // Adjust multiplier as needed
@@ -73,13 +72,7 @@ export function QuestionList({ currentIndex, questions }) {
 	)
 }
 
-function Question({ halfJokerIsActive, questionData }) {
-	const [question, setQuestion] = useState(questionData)
-
-	useEffect(() => {
-		setQuestion(questionData)
-	}, [questionData])
-
+function AnswerButton({ answer, index, halfJokerIsActive, pollResult, isLockedIn }) {
 	function getButtonColor(answer) {
 		let color = 'primary'
 
@@ -87,7 +80,7 @@ function Question({ halfJokerIsActive, questionData }) {
 			color = 'warning'
 		}
 
-		if (question.isLockedIn) {
+		if (isLockedIn) {
 			if (answer.isSelectedByContestant) {
 				color = 'error'
 			}
@@ -103,19 +96,102 @@ function Question({ halfJokerIsActive, questionData }) {
 	return (
 		<Grid
 			container
+			direction="column"
+			spacing={2}
+			sx={{
+				alignItems: 'center',
+				width: '100%',
+			}}
+		>
+			<Grid item xs={12} sx={{ width: '100%' }}>
+				<Button
+					variant="contained"
+					color={getButtonColor(answer)}
+					disabled={!halfJokerIsActive ? false : !answer.isInHalfJoker}
+					fullWidth
+					sx={{
+						fontFamily: 'Verdana, Arial, sans-serif',
+						width: '100%',
+						fontSize: '2rem',
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'center',
+					}}
+				>
+					<span style={{ marginRight: 'auto', fontWeight: 'bold' }}>
+						{letters[index]}:
+					</span>
+					<div style={{ flexGrow: 1, textAlign: 'center' }}>{answer.answerText}</div>
+				</Button>
+			</Grid>
+			<Grid
+				item
+				xs={12}
+				sx={{ width: '100%', visibility: !!pollResult ? 'visible' : 'hidden' }}
+			>
+				<LinearProgress
+					color={pollResult?.isWinner ? 'warning' : 'inherit'}
+					variant="determinate"
+					value={pollResult?.percent || 0}
+					sx={{ height: '20px' }}
+				/>
+			</Grid>
+		</Grid>
+	)
+}
+
+function Question({ halfJokerIsActive, questionData, teamAnswers }) {
+	if (!questionData) {
+		return (
+			<Grid
+				container
+				spacing={3}
+				sx={{
+					justifyContent: 'center',
+					alignItems: 'flex-end',
+				}}
+			>
+				<Grid
+					item
+					xs={12}
+					sx={{ display: 'flex', justifyContent: 'center', paddingTop: '100px' }}
+				>
+					<img
+						src="https://cloud.skyship.space/s/LN5eeqQ8rH5xqYs/download/logo.png"
+						alt={'logo'}
+						style={{ maxWidth: '80%', height: 'auto' }}
+					/>
+				</Grid>
+			</Grid>
+		)
+	}
+
+	const [question, setQuestion] = useState(questionData)
+
+	useEffect(() => {
+		setQuestion(questionData)
+	}, [questionData])
+
+	return (
+		<Grid
+			container
 			spacing={3}
 			sx={{
 				justifyContent: 'center',
 				alignItems: 'flex-end',
 			}}
 		>
-			<Grid2 xs={12} sx={{ display: 'flex', justifyContent: 'center', paddingTop: '100px' }}>
+			<Grid
+				item
+				xs={12}
+				sx={{ display: 'flex', justifyContent: 'center', paddingTop: '100px' }}
+			>
 				<img
 					src="https://cloud.skyship.space/s/LN5eeqQ8rH5xqYs/download/logo.png"
 					alt={'logo'}
 					style={{ maxWidth: '80%', height: 'auto' }}
 				/>
-			</Grid2>
+			</Grid>
 			<Grid item xs={12}>
 				<Typography
 					variant="h6"
@@ -135,30 +211,14 @@ function Question({ halfJokerIsActive, questionData }) {
 			</Grid>
 			{question.answers.map((answer, index) => (
 				<Grid item xs={6} key={answer.answerText}>
-					<Button
-						variant="contained"
-						color={getButtonColor(answer)}
-						disabled={!halfJokerIsActive ? false : !answer.isInHalfJoker}
-						fullWidth
-						sx={{
-							fontFamily: 'Verdana, Arial, sans-serif',
-							width: '100%',
-							fontSize: '2rem',
-							display: 'flex',
-							justifyContent: 'center',
-							alignItems: 'center',
-							padding: '0 16px', // Add padding for better spacing
-						}}
-					>
-						<span style={{ marginRight: 'auto', fontWeight: 'bold' }}>
-							{letters[index]}:
-						</span>{' '}
-						{/* Align 'A:' to the left */}
-						<div style={{ flexGrow: 1, textAlign: 'center' }}>
-							{answer.answerText}
-						</div>{' '}
-						{/* Keep answer text centered */}
-					</Button>
+					<AnswerButton
+						key={index}
+						answer={answer}
+						index={index}
+						halfJokerIsActive={halfJokerIsActive}
+						pollResult={!!teamAnswers && teamAnswers[answer.id]}
+						isLockedIn={question.isLockedIn}
+					/>
 				</Grid>
 			))}
 		</Grid>
@@ -170,12 +230,12 @@ function renderChip(joker) {
 		<Chip
 			key={joker.jokerType}
 			color={!joker.questionIndex ? 'primary' : 'default'}
-			icon={jokerIcons[joker.jokerType.toLowerCase()]}
+			icon={jokerIcons(4)[joker.jokerType.toLowerCase()]}
 			sx={{
 				width: '200px', // Increase width
 				height: '120px', // Increase height
 				fontSize: '4rem', // Increase font size
-				borderRadius: '60px', // Make chip oval
+				borderRadius: '50%',
 				margin: '100px',
 			}}
 		/>
@@ -231,6 +291,54 @@ function MainScreen() {
 		return <></>
 	}
 
+	function GetTeamAnswers() {
+		const questionAnswers = quizShow.questions.find(
+			(e) => e.index === quizShow.questionIndex
+		).answers
+
+		const answers = quizShow.teams
+			.map((e) => e.answers.find((a) => a.questionIndex === quizShow.questionIndex))
+			.filter((e) => !!e)
+
+		const totalAnswers = answers.length
+
+		// Group answers by answerId
+		const groupedByAnswerId = answers.reduce((acc, answer) => {
+			if (!acc[answer.answerId]) {
+				acc[answer.answerId] = []
+			}
+			acc[answer.answerId].push(answer)
+
+			return acc
+		}, {})
+
+		// Find the maximum group size
+		const maxGroupSize = Math.max(
+			...Object.values(groupedByAnswerId).map((group) => group.length)
+		)
+
+		// Initialize result with all possible answerIds from questionAnswers
+		const result = questionAnswers.reduce((acc, questionAnswer) => {
+			const answerId = questionAnswer.id
+			const group = groupedByAnswerId[answerId] || []
+			const groupSize = group.length
+
+			acc[answerId] = {
+				isWinner: groupSize === maxGroupSize && maxGroupSize > 0,
+				percent: totalAnswers > 0 ? Math.round((groupSize / totalAnswers) * 100) : 0,
+			}
+
+			return acc
+		}, {})
+
+		return result
+	}
+
+	const teamAnswers =
+		quizShow.jokers.some(
+			(e) => e.questionIndex === quizShow.questionIndex && e.jokerType === 'Poll'
+		) && GetTeamAnswers()
+
 	return (
 		<Box
 			sx={{
@@ -269,8 +377,9 @@ function MainScreen() {
 						(question) => question.index === quizShow.questionIndex
 					)}
 					halfJokerIsActive={quizShow.jokers.some(
-						(e) => e.questionIndex === quizShow.questionIndex
+						(e) => e.questionIndex === quizShow.questionIndex && e.jokerType === 'Half'
 					)}
+					teamAnswers={teamAnswers}
 				/>
 			</Box>
 			<Box

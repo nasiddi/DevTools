@@ -61,5 +61,19 @@ public class DevToolsContext : DbContext
             .Property(e => e.JokerType)
             .HasMaxLength(20)
             .HasConversion(converter);
+        
+        builder.Entity<Team>()
+            .HasIndex(e => new {e.Name, e.QuizShowId})
+            .IsUnique();
+
+        builder.Entity<Team>()
+            .HasIndex(e => new {e.TeamId, e.QuizShowId})
+            .IsUnique();
+
+        builder.Entity<TeamAnswer>()
+            .HasIndex(e => new {e.TeamId, e.QuestionIndex, e.AnswerId})
+            .IsUnique();
+
+
     }
 }

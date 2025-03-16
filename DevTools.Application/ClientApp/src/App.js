@@ -16,6 +16,7 @@ import { Statistics } from './components/Citadels/Statistics'
 import { MasterListConverter } from './components/MasterListConverter'
 import MainScreen from './components/Quiz/MainScreen'
 import ControlScreen from './components/Quiz/ControlScreen'
+import TeamScreen from './components/Quiz/TeamScreen'
 
 export default function App() {
 	return (
@@ -60,6 +61,7 @@ export default function App() {
 					<Route exact path="/quiz/controlscreen" element={<AuthRoute />}>
 						<Route exact path="/quiz/controlscreen" element={<ControlScreen />} />
 					</Route>
+					<Route exact path="/quiz/team" element={<TeamScreen />} />
 				</Routes>
 			</CleanLayout>
 		</>

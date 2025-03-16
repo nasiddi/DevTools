@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DevTools.Application.Database;
 using DevTools.Application.Models.Quiz;
@@ -43,6 +44,10 @@ public class QuizController : ControllerBase
     {
         var quizShow = await GetActiveQuizShow()
             .AsNoTracking()
+            .Include(e => e.Teams)
+            .ThenInclude(e => e.Answers)
+            .Include(e => e.Teams)
+            .ThenInclude(e => e.Jokers)
             .Include(e => e.Jokers)
             .Include(e => e.Questions)
             .ThenInclude(e => e.Answers)
@@ -62,12 +67,17 @@ public class QuizController : ControllerBase
     {
        
         var quizShow = await GetActiveQuizShow()
+            .Include(e => e.Teams)
+            .ThenInclude(e => e.Answers)
+            .Include(e => e.Teams)
+            .ThenInclude(e => e.Jokers)
             .Include(e => e.Jokers)
             .Include(e => e.Questions)
             .ThenInclude(e => e.Answers)
             .SingleAsync();
 
-        quizShow.QuestionIndex = 1;
+        quizShow.QuestionIndex = 0;
+        quizShow.QuestionStartTime = null;
         
         foreach (var question in quizShow.Questions)
         {
@@ -82,6 +92,8 @@ public class QuizController : ControllerBase
         {
             joker.QuestionIndex = null;
         }
+        
+        _dbContext.RemoveRange(quizShow.Teams);
 
         await _dbContext.SaveChangesAsync();
         return Ok();
@@ -95,6 +107,7 @@ public class QuizController : ControllerBase
         var quizShow = await GetActiveQuizShow().SingleAsync();
         
         quizShow.QuestionIndex = questionIndex;
+        quizShow.QuestionStartTime = DateTime.Now;
         await _dbContext.SaveChangesAsync();
         return Ok();
     }
@@ -150,6 +163,52 @@ public class QuizController : ControllerBase
         var joker = quizShow.Jokers.Single(e => e.Id == id);
         joker.QuestionIndex = quizShow.QuestionIndex;
 
+        await _dbContext.SaveChangesAsync();
+        return Ok();
+    }
+    
+    [HttpPost]
+    [Route("teams/register")]
+    public async Task<IActionResult> RegisterTeam([FromQuery] string name, [FromQuery] Guid teamId)
+    {
+        var quizShow = await GetActiveQuizShow()
+            .Include(e => e.Jokers)
+            .SingleAsync();
+        
+        quizShow.AddTeam(name, teamId);
+        
+        await _dbContext.SaveChangesAsync();
+        return Ok();
+    }
+    
+    [HttpPost]
+    [Route("teams/{teamId}/answer/{answerId}")]
+    public async Task<IActionResult> SetTeamAnswer(int teamId, int questionId, int answerId)
+    {
+        var quizShow = await GetActiveQuizShow()
+            .Include(e => e.Questions)
+            .ThenInclude(e => e.Answers)
+            .Include(e => e.Teams)
+            .ThenInclude(e => e.Answers)
+            .SingleAsync();
+        
+        quizShow.AddTeamAnswer(teamId, answerId);
+        
+        await _dbContext.SaveChangesAsync();
+        return Ok();
+    }
+    
+    [HttpPost]
+    [Route("teams/{teamId}/jokers/{jokerId}/use")]
+    public async Task<IActionResult> UseTeamJoker(int teamId, int jokerId)
+    {
+        var quizShow = await GetActiveQuizShow()
+            .Include(e => e.Teams)
+            .ThenInclude(e => e.Jokers)
+            .SingleAsync();
+        
+        quizShow.UseTeamJoker(teamId, jokerId);
+        
         await _dbContext.SaveChangesAsync();
         return Ok();
     }

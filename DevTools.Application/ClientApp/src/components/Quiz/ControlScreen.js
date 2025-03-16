@@ -4,6 +4,10 @@ import { get, post } from '../../BackendClient'
 import { jokerIcons, letters } from './MainScreen'
 
 function Question({ halfJokerIsActive, questionData }) {
+	if (!questionData) {
+		return <></>
+	}
+
 	const [question, setQuestion] = useState(questionData)
 
 	useEffect(() => {
@@ -97,7 +101,6 @@ function Question({ halfJokerIsActive, questionData }) {
 							display: 'flex',
 							justifyContent: 'center',
 							alignItems: 'center',
-							padding: '0 16px', // Add padding for better spacing
 						}}
 						onClick={() => onClickAnswer(answer)}
 					>
@@ -128,7 +131,7 @@ function renderJoker(joker, onClickJoker) {
 			}}
 			onClick={() => onClickJoker(joker)}
 		>
-			{jokerIcons[joker.jokerType.toLowerCase()]}
+			{jokerIcons(4)[joker.jokerType.toLowerCase()]}
 		</Button>
 	)
 }
@@ -262,7 +265,7 @@ function ControlScreen() {
 			>
 				<Question
 					halfJokerIsActive={quizShow.jokers.some(
-						(e) => e.questionIndex === quizShow.questionIndex
+						(e) => e.questionIndex === quizShow.questionIndex && e.jokerType === 'Half'
 					)}
 					questionData={quizShow.questions.find(
 						(question) => question.index === quizShow.questionIndex

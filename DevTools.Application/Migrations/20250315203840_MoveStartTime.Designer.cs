@@ -4,14 +4,16 @@ using DevTools.Application.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DevTools.Application.Migrations
 {
     [DbContext(typeof(DevToolsContext))]
-    partial class DevToolsContextModelSnapshot : ModelSnapshot
+    [Migration("20250315203840_MoveStartTime")]
+    partial class MoveStartTime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -278,6 +280,9 @@ namespace DevTools.Application.Migrations
                     b.Property<int?>("QuestionIndex")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("QuestionStartTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("QuizShowId")
                         .HasColumnType("int");
 
@@ -334,9 +339,6 @@ namespace DevTools.Application.Migrations
                     b.Property<int>("QuestionIndex")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("QuestionStartTime")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
                     b.ToTable("QuizShows");
@@ -383,9 +385,6 @@ namespace DevTools.Application.Migrations
                     b.Property<int>("AnswerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("AnswerTimeMilliseconds")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("bit");
 
@@ -397,8 +396,7 @@ namespace DevTools.Application.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TeamId", "QuestionIndex", "AnswerId")
-                        .IsUnique();
+                    b.HasIndex("TeamId");
 
                     b.ToTable("TeamAnswer");
                 });

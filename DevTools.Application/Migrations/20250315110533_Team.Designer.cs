@@ -4,14 +4,16 @@ using DevTools.Application.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DevTools.Application.Migrations
 {
     [DbContext(typeof(DevToolsContext))]
-    partial class DevToolsContextModelSnapshot : ModelSnapshot
+    [Migration("20250315110533_Team")]
+    partial class Team
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -281,6 +283,9 @@ namespace DevTools.Application.Migrations
                     b.Property<int>("QuizShowId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("StartTime")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
                     b.HasIndex("QuizShowId");
@@ -334,9 +339,6 @@ namespace DevTools.Application.Migrations
                     b.Property<int>("QuestionIndex")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("QuestionStartTime")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
                     b.ToTable("QuizShows");
@@ -364,12 +366,6 @@ namespace DevTools.Application.Migrations
 
                     b.HasIndex("QuizShowId");
 
-                    b.HasIndex("Name", "QuizShowId")
-                        .IsUnique();
-
-                    b.HasIndex("TeamId", "QuizShowId")
-                        .IsUnique();
-
                     b.ToTable("Team");
                 });
 
@@ -383,9 +379,6 @@ namespace DevTools.Application.Migrations
                     b.Property<int>("AnswerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("AnswerTimeMilliseconds")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("bit");
 
@@ -397,33 +390,9 @@ namespace DevTools.Application.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TeamId", "QuestionIndex", "AnswerId")
-                        .IsUnique();
-
-                    b.ToTable("TeamAnswer");
-                });
-
-            modelBuilder.Entity("DevTools.Application.Models.Quiz.TeamJoker", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("JokerType")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("QuestionIndex")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TeamId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
                     b.HasIndex("TeamId");
 
-                    b.ToTable("TeamJoker");
+                    b.ToTable("TeamAnswer");
                 });
 
             modelBuilder.Entity("DevTools.Application.Models.User", b =>
@@ -548,15 +517,6 @@ namespace DevTools.Application.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DevTools.Application.Models.Quiz.TeamJoker", b =>
-                {
-                    b.HasOne("DevTools.Application.Models.Quiz.Team", null)
-                        .WithMany("Jokers")
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("DevTools.Application.Models.Citadels.Game", b =>
                 {
                     b.Navigation("Hands");
@@ -593,8 +553,6 @@ namespace DevTools.Application.Migrations
             modelBuilder.Entity("DevTools.Application.Models.Quiz.Team", b =>
                 {
                     b.Navigation("Answers");
-
-                    b.Navigation("Jokers");
                 });
 #pragma warning restore 612, 618
         }
