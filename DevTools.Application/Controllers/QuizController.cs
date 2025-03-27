@@ -100,6 +100,16 @@ public class QuizController : ControllerBase
     }
     
     [HttpPost]
+    [Route("registration/toggle")]
+    public async Task<IActionResult> ToggleQuizRegistration()
+    {
+        var quizShow = await GetActiveQuizShow().SingleAsync();
+        quizShow.RegistrationIsOpen = !quizShow.RegistrationIsOpen;
+        await _dbContext.SaveChangesAsync();
+        return Ok();
+    }
+    
+    [HttpPost]
     [Route("questions/current")]
     public async Task<IActionResult> SetCurrentQuestionIndex([FromQuery]int questionIndex)
     {

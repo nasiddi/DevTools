@@ -120,12 +120,16 @@ function Question({ halfJokerIsActive, question, team, canSubmitAnswer, teamAnsw
 	}
 
 	function getDisabled(answer) {
-		if (!canSubmitAnswer) {
-			return true
+		const isSelectedAnswer = answer.id === (teamAnswer?.answerId || selectedAnswerId)
+		const isLockedInCorrectAnswer =
+			question.isLockedIn && question.answers.find((e) => e.isCorrect).id === answer.id
+
+		if (isLockedInCorrectAnswer) {
+			return false
 		}
 
-		if (!!teamAnswer) {
-			return answer.id !== selectedAnswerId
+		if (!canSubmitAnswer && !isSelectedAnswer) {
+			return true
 		}
 
 		return !halfJokerIsActive ? false : !answer.isInHalfJoker
@@ -296,6 +300,7 @@ function Register({ onSignUp, teams }) {
 						variant="outlined"
 						value={name}
 						onChange={(e) => setTeamName(e)}
+						inputProps={{ maxLength: 20 }}
 						fullWidth
 						helperText="Maximal 20 Zeichen"
 					/>

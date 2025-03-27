@@ -18,6 +18,8 @@ public class QuizShow
     public ICollection<Team> Teams { get; set; } = new HashSet<Team>();
 
     public bool IsActive { get; set; } = false;
+    public bool RegistrationIsOpen { get; set; } = false;
+    
     
     public DateTime? QuestionStartTime { get; set; }
 
@@ -70,7 +72,18 @@ public enum JokerType
     Half,
     Poll,
     Phone
-}
+}public class Answer
+ {
+     public int Id { get; set; }
+     [ForeignKey("Question")]
+     public int QuestionId { get; set; }
+     [StringLength(150)]
+     public string AnswerText { get; set; } = null!;
+     public bool IsCorrect { get; set; }
+     public bool IsSelectedByContestant { get; set; }
+ 
+     public bool IsInHalfJoker { get; set; } = false;
+ }
 
 public class Question
 {
@@ -93,18 +106,7 @@ public class Question
     }
 }
 
-public class Answer
-{
-    public int Id { get; set; }
-    [ForeignKey("Question")]
-    public int QuestionId { get; set; }
-    [StringLength(150)]
-    public string AnswerText { get; set; } = null!;
-    public bool IsCorrect { get; set; }
-    public bool IsSelectedByContestant { get; set; }
 
-    public bool IsInHalfJoker { get; set; } = false;
-}
 
 public class Team
 {

@@ -4,6 +4,11 @@ export function GetTeamAnswers(quizShow) {
 	).answers
 
 	const answers = quizShow.teams
+		.filter(
+			(e) =>
+				e.jokers.find((j) => j.jokerType === 'Poll')?.questionIndex !==
+				quizShow.questionIndex
+		)
 		.map((e) => e.answers.find((a) => a.questionIndex === quizShow.questionIndex))
 		.filter((e) => !!e)
 

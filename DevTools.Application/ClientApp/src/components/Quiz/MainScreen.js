@@ -6,6 +6,8 @@ import RuleIcon from '@mui/icons-material/Rule'
 import PhoneEnabledIcon from '@mui/icons-material/PhoneEnabled'
 import GroupsIcon from '@mui/icons-material/Groups'
 import { GetTeamAnswers } from './HelperFunctions'
+import TeamResults from './TeamResults'
+import { QRCodeCanvas } from 'qrcode.react'
 
 export const letters = ['A', 'B', 'C', 'D']
 
@@ -95,15 +97,7 @@ function AnswerButton({ answer, index, halfJokerIsActive, pollResult, isLockedIn
 	}
 
 	return (
-		<Grid
-			container
-			direction="column"
-			spacing={2}
-			sx={{
-				alignItems: 'center',
-				width: '100%',
-			}}
-		>
+		<Grid container spacing={2}>
 			<Grid item xs={12} sx={{ width: '100%' }}>
 				<Button
 					variant="contained"
@@ -141,7 +135,7 @@ function AnswerButton({ answer, index, halfJokerIsActive, pollResult, isLockedIn
 	)
 }
 
-function Question({ halfJokerIsActive, questionData, teamAnswers }) {
+function Question({ halfJokerIsActive, questionData, teamAnswers, registrationIsOpen }) {
 	if (!questionData) {
 		return (
 			<Grid
@@ -160,9 +154,29 @@ function Question({ halfJokerIsActive, questionData, teamAnswers }) {
 					<img
 						src="https://cloud.skyship.space/s/LN5eeqQ8rH5xqYs/download/logo.png"
 						alt={'logo'}
-						style={{ maxWidth: '80%', height: 'auto' }}
+						style={{ maxWidth: '25%', height: 'auto' }}
 					/>
 				</Grid>
+				{registrationIsOpen && (
+					<Grid item xs={12}>
+						<Box
+							sx={{
+								paddingTop: '50px',
+								display: 'flex',
+								justifyContent: 'center',
+								alignItems: 'center',
+								width: '100%', // Ensures the Box takes full width of the Grid item
+							}}
+						>
+							<QRCodeCanvas
+								value="https://devtools.skyship.space/quiz/team"
+								size={300}
+								fgColor="#1976d2"
+								bgColor="lightblue"
+							/>
+						</Box>
+					</Grid>
+				)}
 			</Grid>
 		)
 	}
@@ -174,14 +188,7 @@ function Question({ halfJokerIsActive, questionData, teamAnswers }) {
 	}, [questionData])
 
 	return (
-		<Grid
-			container
-			spacing={3}
-			sx={{
-				justifyContent: 'center',
-				alignItems: 'flex-end',
-			}}
-		>
+		<Grid container spacing={3}>
 			<Grid
 				item
 				xs={12}
@@ -190,10 +197,10 @@ function Question({ halfJokerIsActive, questionData, teamAnswers }) {
 				<img
 					src="https://cloud.skyship.space/s/LN5eeqQ8rH5xqYs/download/logo.png"
 					alt={'logo'}
-					style={{ maxWidth: '80%', height: 'auto' }}
+					style={{ maxWidth: '25%', height: 'auto' }}
 				/>
 			</Grid>
-			<Grid item xs={12}>
+			<Grid item xs={12} sx={{ marginTop: '100px' }}>
 				<Typography
 					variant="h6"
 					sx={{
@@ -205,6 +212,7 @@ function Question({ halfJokerIsActive, questionData, teamAnswers }) {
 						color: 'white', // Ensure text is readable on primary background
 						boxSizing: 'border-box',
 						fontSize: '2.2rem',
+						marginBottom: '50px',
 					}}
 				>
 					{question.questionText}
@@ -261,6 +269,7 @@ function JokerList({ jokers }) {
 
 function MainScreen() {
 	const [quizShow, setQuizShow] = useState(undefined)
+	const anchorRef = React.useRef(null)
 
 	useEffect(() => {
 		document.body.style.backgroundColor = 'lightblue'
@@ -308,7 +317,6 @@ function MainScreen() {
 			<Box
 				sx={{
 					width: '960px', // Set width to 1920px
-					border: '1px solid black',
 				}}
 			>
 				<QuestionList
@@ -319,7 +327,6 @@ function MainScreen() {
 			<Box
 				sx={{
 					width: '960px', // Ensure the width is specified in pixels
-					border: '1px solid black', // Add a black border
 				}}
 			>
 				<JokerList jokers={quizShow.jokers} />
@@ -327,7 +334,8 @@ function MainScreen() {
 			<Box
 				sx={{
 					width: '1920px', // Set width to 1920px
-					border: '1px solid black',
+					boxSizing: 'border-box',
+					padding: '100px',
 				}}
 			>
 				<Question
@@ -338,14 +346,16 @@ function MainScreen() {
 						(e) => e.questionIndex === quizShow.questionIndex && e.jokerType === 'Half'
 					)}
 					teamAnswers={teamAnswers}
+					registrationIsOpen={quizShow.registrationIsOpen}
 				/>
 			</Box>
 			<Box
 				sx={{
-					width: '1920px', // Set width to 1920px
-					border: '1px solid black',
+					width: '1920px',
 				}}
-			/>
+			>
+				<TeamResults quizShow={quizShow} />
+			</Box>
 		</Box>
 	)
 }
