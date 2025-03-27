@@ -20,26 +20,6 @@ public class QuizController : ControllerBase
     }
     
     [HttpGet]
-    [Route("questions")]
-    public async Task<IActionResult> GetQuestions()
-    {
-
-        var quizShow = await GetActiveQuizShow()
-            .AsNoTracking()
-            .Where(e => e.IsActive)
-            .Include(e => e.Questions)
-            .ThenInclude(e => e.Answers)
-            .SingleAsync();
-        
-        foreach (var question in quizShow.Questions)
-        {
-            question.ShuffleAnswers();
-        }
-
-        return Ok(quizShow.Questions);
-    }
-    
-    [HttpGet]
     public async Task<IActionResult> GetQuizShow()
     {
         var quizShow = await GetActiveQuizShow()
@@ -117,7 +97,7 @@ public class QuizController : ControllerBase
         var quizShow = await GetActiveQuizShow().SingleAsync();
         
         quizShow.QuestionIndex = questionIndex;
-        quizShow.QuestionStartTime = DateTime.Now;
+        quizShow.QuestionStartTime = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
         return Ok();
     }

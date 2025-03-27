@@ -7,6 +7,8 @@ import CircleIcon from '@mui/icons-material/Circle'
 import RuleIcon from '@mui/icons-material/Rule'
 import GroupsIcon from '@mui/icons-material/Groups'
 import LooksOneIcon from '@mui/icons-material/LooksOne'
+import LooksTwoIcon from '@mui/icons-material/LooksTwo'
+import Looks3Icon from '@mui/icons-material/Looks3'
 
 const teamIconSx = {
 	fontSize: '2rem',
@@ -14,6 +16,27 @@ const teamIconSx = {
 	backgroundColor: 'white',
 	borderRadius: '50%',
 }
+
+const rankings = [
+	<LooksOneIcon
+		key={1}
+		sx={{
+			fontSize: '3rem',
+		}}
+	/>,
+	<LooksTwoIcon
+		key={2}
+		sx={{
+			fontSize: '3rem',
+		}}
+	/>,
+	<Looks3Icon
+		key={3}
+		sx={{
+			fontSize: '3rem',
+		}}
+	/>,
+]
 
 function TeamAnswer({ answers, questionIndex, lastLockedInQuestionIndex }) {
 	const answer = answers.find((e) => e.questionIndex === questionIndex)
@@ -87,8 +110,12 @@ function TeamResults({ quizShow }) {
 	function sortTeams(teams) {
 		return teams.sort((teamA, teamB) => {
 			// Calculate correct answers count
-			const correctAnswersA = teamA.answers.filter((answer) => answer.isCorrect)
-			const correctAnswersB = teamB.answers.filter((answer) => answer.isCorrect)
+			const correctAnswersA = teamA.answers.filter(
+				(answer) => answer.isCorrect && answer.questionIndex <= lastLockedInQuestionIndex
+			)
+			const correctAnswersB = teamB.answers.filter(
+				(answer) => answer.isCorrect && answer.questionIndex <= lastLockedInQuestionIndex
+			)
 
 			// Calculate total answer time
 			const totalTimeA = correctAnswersA.reduce(
@@ -113,7 +140,7 @@ function TeamResults({ quizShow }) {
 
 	return (
 		<Grid container spacing={2} sx={{ padding: '50px' }}>
-			{teams.map((team) => (
+			{teams.map((team, index) => (
 				<Grid item xs={12} key={team.id}>
 					<Paper
 						sx={{
@@ -159,12 +186,16 @@ function TeamResults({ quizShow }) {
 									/>
 								))}
 							</Grid>
-							<Grid item>
-								<LooksOneIcon
-									sx={{
-										fontSize: '3rem',
-									}}
-								/>
+							<Grid
+								item
+								sx={{
+									visibility:
+										index > 2 || lastLockedInQuestionIndex === -1
+											? 'hidden'
+											: 'visible',
+								}}
+							>
+								{index <= 2 && rankings[index]}
 							</Grid>
 						</Grid>
 					</Paper>

@@ -121,12 +121,6 @@ function Question({ halfJokerIsActive, question, team, canSubmitAnswer, teamAnsw
 
 	function getDisabled(answer) {
 		const isSelectedAnswer = answer.id === (teamAnswer?.answerId || selectedAnswerId)
-		const isLockedInCorrectAnswer =
-			question.isLockedIn && question.answers.find((e) => e.isCorrect).id === answer.id
-
-		if (isLockedInCorrectAnswer) {
-			return false
-		}
 
 		if (!canSubmitAnswer && !isSelectedAnswer) {
 			return true
@@ -332,7 +326,7 @@ function TeamScreenInner({ teamId }) {
 
 	useEffect(() => {
 		const interval = setInterval(() => {
-			if (!quizShow?.questionStartTime) {
+			if (!quizShow?.secondsFromStartTime) {
 				setSecondsRemaining(0)
 
 				return
@@ -353,11 +347,8 @@ function TeamScreenInner({ teamId }) {
 				(e) => e.questionIndex === quizShow.questionIndex && e.jokerType === 'Poll'
 			)
 
-			const now = new Date()
-			const startTime = new Date(quizShow.questionStartTime)
-			const targetTime = new Date(startTime.getTime() + (hasPollJoker ? 90 : 60) * 1000)
-			const seconds = (targetTime - now) / 1000
-			setSecondsRemaining(seconds)
+			const availableSeconds = (hasPollJoker ? 90 : 60) - quizShow.secondsFromStartTime
+			setSecondsRemaining(availableSeconds)
 		}, 200)
 
 		return () => clearInterval(interval)

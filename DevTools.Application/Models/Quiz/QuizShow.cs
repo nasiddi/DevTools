@@ -22,6 +22,8 @@ public class QuizShow
     
     
     public DateTime? QuestionStartTime { get; set; }
+    
+    public decimal? SecondsFromStartTime => QuestionStartTime.HasValue ? (decimal)DateTime.UtcNow.Subtract(QuestionStartTime.Value).TotalSeconds : null;
 
     public void AddTeam(string name, Guid teamId)
     {

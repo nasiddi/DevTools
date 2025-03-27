@@ -269,7 +269,6 @@ function JokerList({ jokers }) {
 
 function MainScreen() {
 	const [quizShow, setQuizShow] = useState(undefined)
-	const anchorRef = React.useRef(null)
 
 	useEffect(() => {
 		document.body.style.backgroundColor = 'lightblue'
