@@ -193,7 +193,7 @@ function Question({ halfJokerIsActive, questionData, teamAnswers, registrationIs
 			<Grid
 				item
 				xs={12}
-				sx={{ display: 'flex', justifyContent: 'center', paddingTop: '100px' }}
+				sx={{ display: 'flex', justifyContent: 'center', paddingTop: '0px' }}
 			>
 				<img
 					src="https://cloud.skyship.space/s/LN5eeqQ8rH5xqYs/download/logo.png"
@@ -201,7 +201,7 @@ function Question({ halfJokerIsActive, questionData, teamAnswers, registrationIs
 					style={{ maxWidth: '25%', height: 'auto' }}
 				/>
 			</Grid>
-			<Grid item xs={12} sx={{ marginTop: '100px' }}>
+			<Grid item xs={12} sx={{ marginTop: '50px' }}>
 				<Typography
 					variant="h6"
 					sx={{
