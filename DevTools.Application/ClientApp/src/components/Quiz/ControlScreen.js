@@ -182,6 +182,11 @@ function ControlScreen() {
 		await reloadQuiz()
 	}
 
+	async function onResetJokers() {
+		await post('quiz/jokers/reset')
+		await reloadQuiz()
+	}
+
 	async function onReload() {
 		await post('quiz/reload')
 		await reloadQuiz()
@@ -228,7 +233,7 @@ function ControlScreen() {
 				<Grid item xs={12}>
 					<JokerList jokers={quizShow.jokers} onClickJoker={onClickJoker} />
 				</Grid>
-				<Grid item xs={3}>
+				<Grid item xs={2}>
 					<Button
 						variant="contained"
 						color="primary"
@@ -247,7 +252,7 @@ function ControlScreen() {
 						Next Question
 					</Button>
 				</Grid>
-				<Grid item xs={3}>
+				<Grid item xs={2}>
 					<Button
 						variant="contained"
 						color="info"
@@ -266,7 +271,7 @@ function ControlScreen() {
 						Toggle Registration
 					</Button>
 				</Grid>
-				<Grid item xs={3}>
+				<Grid item xs={2}>
 					<Button
 						variant="contained"
 						color="info"
@@ -285,7 +290,7 @@ function ControlScreen() {
 						Reload Data
 					</Button>
 				</Grid>
-				<Grid item xs={3}>
+				<Grid item xs={2}>
 					<Button
 						variant="contained"
 						color="secondary"
@@ -302,6 +307,25 @@ function ControlScreen() {
 						onClick={onResetQuiz}
 					>
 						Reset Quiz
+					</Button>
+				</Grid>
+				<Grid item xs={2}>
+					<Button
+						variant="contained"
+						color="secondary"
+						fullWidth
+						sx={{
+							fontFamily: 'Verdana, Arial, sans-serif',
+							width: '100%',
+							fontSize: '2rem',
+							display: 'flex',
+							justifyContent: 'center',
+							alignItems: 'center',
+							padding: '0 16px', // Add padding for better spacing
+						}}
+						onClick={onResetJokers}
+					>
+						Reset Jokers
 					</Button>
 				</Grid>
 			</Grid>

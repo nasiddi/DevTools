@@ -57,6 +57,28 @@ public class QuizGameDataService
         dbContext.RemoveRange(quizShow.Teams);
         await UpdateQuizShow(quizShow, dbContext);
     }
+    
+    public async Task ResetJokers()
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<DevToolsContext>();
+        var quizShow = await GetActiveQuizShow(dbContext);
+        
+        foreach (var joker in quizShow.Jokers)
+        {
+            joker.QuestionIndex = null;
+        }
+
+        foreach (var team in quizShow.Teams)
+        {
+            foreach (var joker in team.Jokers)
+            {
+                joker.QuestionIndex = null;
+            }
+        }
+        
+        await UpdateQuizShow(quizShow, dbContext);
+    }
 
     public async Task ToggleQuizRegistration()
     {

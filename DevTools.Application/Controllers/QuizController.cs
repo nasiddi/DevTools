@@ -31,6 +31,14 @@ public class QuizController : ControllerBase
     }
     
     [HttpPost]
+    [Route("jokers/reset")]
+    public async Task<IActionResult> ResetJokers()
+    {
+        await _quizGameDataService.ResetJokers();
+        return Ok();
+    }
+    
+    [HttpPost]
     [Route("reload")]
     public async Task<IActionResult> ReloadQuizShow()
     {
