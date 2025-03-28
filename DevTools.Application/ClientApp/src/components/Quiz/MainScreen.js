@@ -239,7 +239,7 @@ function renderChip(joker) {
 	return (
 		<Chip
 			key={joker.jokerType}
-			color={joker.questionIndex !== null ? 'primary' : 'default'}
+			color={joker.questionIndex === null ? 'primary' : 'default'}
 			icon={jokerIcons(4)[joker.jokerType.toLowerCase()]}
 			sx={{
 				width: '200px', // Increase width
