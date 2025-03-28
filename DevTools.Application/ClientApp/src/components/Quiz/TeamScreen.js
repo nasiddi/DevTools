@@ -408,8 +408,15 @@ function TeamScreenInner({ teamId }) {
 		(e) => e.questionIndex === quizShow.questionIndex && e.jokerType === 'Poll'
 	)
 
+	const isLockedIn = quizShow.questions.find(
+		(question) => question.index === quizShow.questionIndex
+	).isLockedIn
+
 	const canSubmitAnswer =
-		secondsRemaining > 0 && !teamAnswer && (!hasPollJoker || secondsRemaining <= 30)
+		!isLockedIn &&
+		secondsRemaining > 0 &&
+		!teamAnswer &&
+		(!hasPollJoker || secondsRemaining <= 30)
 
 	const teamAnswers = secondsRemaining <= 30 && hasPollJoker && GetTeamAnswers(quizShow)
 
