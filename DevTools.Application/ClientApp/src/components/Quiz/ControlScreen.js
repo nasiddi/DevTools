@@ -182,6 +182,11 @@ function ControlScreen() {
 		await reloadQuiz()
 	}
 
+	async function onReload() {
+		await post('quiz/reload')
+		await reloadQuiz()
+	}
+
 	async function onClickJoker(joker) {
 		await post(`quiz/jokers/${joker.id}/use`)
 		await reloadQuiz()
@@ -223,7 +228,7 @@ function ControlScreen() {
 				<Grid item xs={12}>
 					<JokerList jokers={quizShow.jokers} onClickJoker={onClickJoker} />
 				</Grid>
-				<Grid item xs={4}>
+				<Grid item xs={3}>
 					<Button
 						variant="contained"
 						color="primary"
@@ -242,7 +247,7 @@ function ControlScreen() {
 						Next Question
 					</Button>
 				</Grid>
-				<Grid item xs={4}>
+				<Grid item xs={3}>
 					<Button
 						variant="contained"
 						color="info"
@@ -261,7 +266,26 @@ function ControlScreen() {
 						Toggle Registration
 					</Button>
 				</Grid>
-				<Grid item xs={4}>
+				<Grid item xs={3}>
+					<Button
+						variant="contained"
+						color="info"
+						fullWidth
+						sx={{
+							fontFamily: 'Verdana, Arial, sans-serif',
+							width: '100%',
+							fontSize: '2rem',
+							display: 'flex',
+							justifyContent: 'center',
+							alignItems: 'center',
+							padding: '0 16px', // Add padding for better spacing
+						}}
+						onClick={onReload}
+					>
+						Reload Data
+					</Button>
+				</Grid>
+				<Grid item xs={3}>
 					<Button
 						variant="contained"
 						color="secondary"

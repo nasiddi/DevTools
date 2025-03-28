@@ -282,7 +282,7 @@ function MainScreen() {
 			} catch (error) {
 				console.error('Error fetching quiz show:', error)
 			}
-		}, 200)
+		}, 1000)
 
 		// Cleanup the interval on component unmount
 		return () => clearInterval(intervalId)

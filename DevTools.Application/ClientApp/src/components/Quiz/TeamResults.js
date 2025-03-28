@@ -75,7 +75,11 @@ function TeamResults({ quizShow }) {
 
 	function renderHalfJoker(team) {
 		const joker = team.jokers.find((joker) => joker.jokerType === 'Half')
-		const backgroundColor = !joker?.questionIndex ? 'primary.main' : 'grey'
+		const backgroundColor = !joker?.questionIndex
+			? 'primary.main'
+			: joker.questionIndex === quizShow.questionIndex
+				? 'success.main'
+				: 'grey'
 
 		return (
 			<RuleIcon
@@ -196,6 +200,15 @@ function TeamResults({ quizShow }) {
 								}}
 							>
 								{index <= 2 && rankings[index]}
+								{index > 2 && (
+									<LooksOneIcon
+										key={1}
+										sx={{
+											fontSize: '3rem',
+											visibility: 'hidden',
+										}}
+									/>
+								)}
 							</Grid>
 						</Grid>
 					</Paper>

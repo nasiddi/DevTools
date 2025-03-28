@@ -132,7 +132,7 @@ function Question({ halfJokerIsActive, question, team, canSubmitAnswer, teamAnsw
 	return (
 		<Grid
 			container
-			spacing={3}
+			spacing={2}
 			sx={{
 				justifyContent: 'center',
 				alignItems: 'center',
@@ -215,7 +215,7 @@ function JokerList({ jokers, onClickJoker, showJokers }) {
 	return (
 		<Grid
 			container
-			spacing={3}
+			spacing={2}
 			sx={{
 				justifyContent: 'center',
 				paddingTop: '0',
@@ -363,7 +363,7 @@ function TeamScreenInner({ teamId }) {
 			} catch (error) {
 				console.error('Error fetching quiz show:', error)
 			}
-		}, 200)
+		}, 1000)
 
 		// Cleanup the interval on component unmount
 		return () => clearInterval(intervalId)
@@ -418,7 +418,7 @@ function TeamScreenInner({ teamId }) {
 	return (
 		<Grid
 			container
-			spacing={3}
+			spacing={2}
 			sx={{
 				justifyContent: 'center', // Center grid items horizontally
 				alignItems: 'flex-end',
@@ -431,7 +431,7 @@ function TeamScreenInner({ teamId }) {
 				sx={{
 					display: 'flex',
 					justifyContent: 'center',
-					paddingTop: '20px',
+					paddingTop: '10px',
 					height: '25vh', // Set height to 25% of the viewport height
 				}}
 			>

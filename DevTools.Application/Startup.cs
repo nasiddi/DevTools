@@ -47,6 +47,7 @@ public class Startup
         services.AddScoped<ISpaDeployService, SpaDeployService>();
         services.AddScoped<IFileService, FileService>();
         services.AddScoped<ICitadelsService, CitadelsService>();
+        services.AddSingleton<QuizGameDataService>();
         services.AddControllersWithViews();
         // In production, the React files will be served from this directory
         services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
@@ -87,5 +88,15 @@ public class Startup
                 spa.UseReactDevelopmentServer(npmScript: "start");
             }
         });
+        
+        InitializeApplication(app);
+    }
+    
+    private static void InitializeApplication(IApplicationBuilder app)
+    {
+        using var scope = app.ApplicationServices.CreateScope();
+        var scopedProvider = scope.ServiceProvider;
+        var bookingUpdater = scopedProvider.GetRequiredService<QuizGameDataService>();
+        bookingUpdater.LoadQuizShow().GetAwaiter().GetResult();
     }
 }
