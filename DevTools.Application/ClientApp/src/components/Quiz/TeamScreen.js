@@ -408,9 +408,9 @@ function TeamScreenInner({ teamId }) {
 		(e) => e.questionIndex === quizShow.questionIndex && e.jokerType === 'Poll'
 	)
 
-	const isLockedIn = quizShow.questions.find(
-		(question) => question.index === quizShow.questionIndex
-	).isLockedIn
+	const isLockedIn =
+		quizShow.questions.find((question) => question.index === quizShow.questionIndex)
+			?.isLockedIn || false
 
 	const canSubmitAnswer =
 		!isLockedIn &&
@@ -483,13 +483,13 @@ function TeamScreenInner({ teamId }) {
 					</Box>
 				)}
 			</Grid>
-			{!quizShow.questionIndex && (
+			{quizShow.questionIndex < 0 && (
 				<Grid item xs={12}>
 					<Alert color="info">Bitte warten</Alert>
 				</Grid>
 			)}
 			<Grid item xs={12}>
-				{!!quizShow.questionIndex && (
+				{quizShow.questionIndex >= 0 && (
 					<JokerList
 						jokers={team.jokers}
 						onClickJoker={onClickJoker}
