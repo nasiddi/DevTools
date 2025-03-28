@@ -31,6 +31,7 @@ export function QuestionList({ currentIndex, questions }) {
 			}}
 		>
 			{questions
+				.filter((e) => e.index > 0)
 				.sort((a, b) => b.index - a.index)
 				.map((question) => (
 					<ListItem

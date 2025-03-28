@@ -96,7 +96,11 @@ function TeamResults({ quizShow }) {
 
 	function renderPollJoker(team) {
 		const joker = team.jokers.find((joker) => joker.jokerType === 'Poll')
-		const backgroundColor = !joker?.questionIndex ? 'primary.main' : 'grey'
+		const backgroundColor = !joker?.questionIndex
+			? 'primary.main'
+			: joker.questionIndex === quizShow.questionIndex
+				? 'success.main'
+				: 'grey'
 
 		return (
 			<GroupsIcon
@@ -115,10 +119,16 @@ function TeamResults({ quizShow }) {
 		return teams.sort((teamA, teamB) => {
 			// Calculate correct answers count
 			const correctAnswersA = teamA.answers.filter(
-				(answer) => answer.isCorrect && answer.questionIndex <= lastLockedInQuestionIndex
+				(answer) =>
+					answer.isCorrect &&
+					answer.questionIndex <= lastLockedInQuestionIndex &&
+					answer.questionIndex > 0
 			)
 			const correctAnswersB = teamB.answers.filter(
-				(answer) => answer.isCorrect && answer.questionIndex <= lastLockedInQuestionIndex
+				(answer) =>
+					answer.isCorrect &&
+					answer.questionIndex <= lastLockedInQuestionIndex &&
+					answer.questionIndex > 0
 			)
 
 			// Calculate total answer time

@@ -37,7 +37,7 @@ public class QuizGameDataService
         var dbContext = scope.ServiceProvider.GetRequiredService<DevToolsContext>();
         var quizShow = await GetActiveQuizShow(dbContext);
 
-        quizShow.QuestionIndex = 0;
+        quizShow.QuestionIndex = -1;
         quizShow.QuestionStartTime = null;
         
         foreach (var question in quizShow.Questions)
